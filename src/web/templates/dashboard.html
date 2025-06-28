@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealtyScanner Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 0.5rem;
+        }
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 0.5rem;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .notification-badge {
+            background-color: #dc3545;
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        .property-card {
+            border-left: 4px solid #28a745;
+        }
+        .property-card.high-match {
+            border-left-color: #dc3545;
+        }
+        .property-card.medium-match {
+            border-left-color: #ffc107;
+        }
+        .property-card.low-match {
+            border-left-color: #6c757d;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white"><i class="bi bi-house-fill"></i> RealtyScanner</h4>
+                        <small class="text-white-50">Property Management Dashboard</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#profiles">
+                                <i class="bi bi-person-lines-fill"></i> Search Profiles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#notifications">
+                                <i class="bi bi-bell-fill"></i> Notifications
+                                <span class="notification-badge ms-2">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#properties">
+                                <i class="bi bi-building"></i> Properties
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#analytics">
+                                <i class="bi bi-graph-up"></i> Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#settings">
+                                <i class="bi bi-gear-fill"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <strong>Admin User</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                            <li><a class="dropdown-item" href="#profile">Profile</a></li>
+                            <li><a class="dropdown-item" href="#settings">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#logout">Sign out</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle"></i> New Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">Active Profiles</h6>
+                                        <h2 class="text-white">42</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-person-lines-fill fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">Today's Notifications</h6>
+                                        <h2 class="text-white">156</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-bell-fill fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">New Properties</h6>
+                                        <h2 class="text-white">89</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-building fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">Success Rate</h6>
+                                        <h2 class="text-white">98.7%</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-check-circle-fill fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-activity"></i> System Status
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-online"></span>
+                                            <strong>Database</strong>
+                                        </div>
+                                        <small class="text-muted">Connected</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-online"></span>
+                                            <strong>Telegram Bot</strong>
+                                        </div>
+                                        <small class="text-muted">Running</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-online"></span>
+                                            <strong>Scrapers</strong>
+                                        </div>
+                                        <small class="text-muted">Active</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-warning"></span>
+                                            <strong>Notifications</strong>
+                                        </div>
+                                        <small class="text-muted">3 pending</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Properties -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-building"></i> Recent Property Matches
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="property-card card mb-3 high-match">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">Beautiful 2-room in Florentin</h6>
+                                                <p class="card-text text-muted">4,800 ILS/month • 2 rooms • Florentin, Tel Aviv</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 15 minutes ago • 
+                                                    <i class="bi bi-target"></i> 94% match
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-danger">High Match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="property-card card mb-3 medium-match">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">Modern studio near Rothschild</h6>
+                                                <p class="card-text text-muted">5,200 ILS/month • 1 room • City Center, Tel Aviv</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 1 hour ago • 
+                                                    <i class="bi bi-target"></i> 76% match
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-warning">Medium Match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="property-card card mb-3 low-match">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">Spacious 3-room apartment</h6>
+                                                <p class="card-text text-muted">6,800 ILS/month • 3 rooms • Ramat Aviv, Tel Aviv</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 2 hours ago • 
+                                                    <i class="bi bi-target"></i> 62% match
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-secondary">Low Match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-bell"></i> Recent Notifications
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="me-3">
+                                        <i class="bi bi-telegram text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">Telegram</small>
+                                        <p class="mb-1 small">Property notification sent to @user123</p>
+                                        <small class="text-muted">5 minutes ago</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="me-3">
+                                        <i class="bi bi-envelope text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">Email</small>
+                                        <p class="mb-1 small">Weekly digest sent to user@example.com</p>
+                                        <small class="text-muted">2 hours ago</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <i class="bi bi-whatsapp text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">WhatsApp</small>
+                                        <p class="mb-1 small">Property alert sent to +972501234567</p>
+                                        <small class="text-muted">4 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // WebSocket connection for real-time updates
+        let ws;
+        
+        function connectWebSocket() {
+            ws = new WebSocket(`ws://localhost:8000/ws/notifications/admin`);
+            
+            ws.onopen = function(event) {
+                console.log('WebSocket connected');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleRealTimeUpdate(data);
+            };
+            
+            ws.onclose = function(event) {
+                console.log('WebSocket disconnected');
+                // Attempt to reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+        
+        function handleRealTimeUpdate(data) {
+            console.log('Real-time update received:', data);
+            
+            if (data.type === 'property_match') {
+                showNewPropertyNotification(data.data);
+            } else if (data.type === 'notification_update') {
+                updateNotificationsList();
+            } else if (data.type === 'system_status') {
+                updateSystemStatus(data.data);
+            }
+        }
+        
+        function showNewPropertyNotification(propertyData) {
+            // Show toast notification for new property
+            const toast = `
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <i class="bi bi-building text-primary me-2"></i>
+                        <strong class="me-auto">New Property Match</strong>
+                        <small>Just now</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${propertyData.property.title} - ${propertyData.property.price} ILS
+                    </div>
+                </div>
+            `;
+            
+            // Add toast to page and show it
+            document.body.insertAdjacentHTML('beforeend', toast);
+            const toastElement = document.querySelector('.toast:last-child');
+            const bsToast = new bootstrap.Toast(toastElement);
+            bsToast.show();
+        }
+        
+        // Initialize WebSocket connection
+        connectWebSocket();
+        
+        // Update counters every 30 seconds
+        setInterval(updateDashboardStats, 30000);
+        
+        function updateDashboardStats() {
+            // Fetch and update dashboard statistics
+            fetch('/api/v1/notifications/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update statistics cards
+                    console.log('Updated stats:', data);
+                })
+                .catch(error => console.error('Error updating stats:', error));
+        }
+    </script>
+</body>
+</html>

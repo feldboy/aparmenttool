@@ -1,0 +1,68 @@
+# Production Docker Compose with minimal dependencies
+# For simpler deployments without full monitoring stack
+
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: realtyscanner-mongodb-prod
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-realtyscanner}
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - realtyscanner-network
+
+  # Redis for caching
+  redis:
+    image: redis:7.2-alpine
+    container_name: realtyscanner-redis-prod
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - realtyscanner-network
+
+  # Main Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: realtyscanner-app-prod
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://admin:password@mongodb:27017/realtyscanner?authSource=admin
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      DEBUG: false
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    volumes:
+      - app_logs:/app/logs
+      - app_data:/app/data
+    networks:
+      - realtyscanner-network
+    depends_on:
+      - mongodb
+      - redis
+
+volumes:
+  mongodb_data:
+  redis_data:
+  app_logs:
+  app_data:
+
+networks:
+  realtyscanner-network:
+    driver: bridge

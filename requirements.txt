@@ -1,0 +1,23 @@
+agno>=0.9.0
+playwright>=1.48.0
+pymongo>=4.10.1
+python-dotenv>=1.0.1
+pydantic>=2.10.4
+twilio>=9.3.7
+requests>=2.32.3
+beautifulsoup4>=4.12.3
+streamlit>=1.41.1
+python-telegram-bot>=21.9
+sendgrid>=6.11.0
+pre-commit>=4.0.1
+
+# Epic 4: Telegram Bot & Web Dashboard Dependencies
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+jinja2>=3.1.4
+python-multipart>=0.0.12
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.3.0
+websockets>=13.1
+aiofiles>=24.1.0
+itsdangerous>=2.2.0
