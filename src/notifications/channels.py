@@ -4,13 +4,14 @@ Concrete notification channel implementations
 
 import os
 import logging
+import asyncio
 from typing import Dict, Any, Optional
 from .base import NotificationChannel, NotificationMessage, NotificationResult, NotificationStatus
 
 logger = logging.getLogger(__name__)
 
 class TelegramChannel(NotificationChannel):
-    """Telegram notification channel using Bot API"""
+    """Telegram notification channel using notification-only bot"""
     
     def __init__(self, config: Dict[str, Any]):
         super().__init__("Telegram", config)
@@ -29,7 +30,7 @@ class TelegramChannel(NotificationChannel):
         return True
     
     def send(self, message: NotificationMessage, recipient: str) -> NotificationResult:
-        """Send notification via Telegram Bot API"""
+        """Send notification via Telegram notification bot"""
         if not self.is_enabled():
             return NotificationResult(
                 status=NotificationStatus.FAILED,
@@ -43,11 +44,46 @@ class TelegramChannel(NotificationChannel):
             )
         
         try:
-            # For now, simulate sending - in production this would use telegram-bot library
-            formatted_message = self.format_message(message)
+            # Import the notification bot
+            from ..telegram_bot.notification_bot import send_property_alert
             
-            # Simulate API call
-            logger.info("🤖 [TELEGRAM SIMULATION] Sending message to chat_id: %s", recipient)
+            # Convert notification message to property data format
+            property_data = {
+                'title': message.title,
+                'description': message.content,
+                'url': message.url,
+                'source': 'RealtyScanner',
+                'timestamp': 'עכשיו',
+                'priority': message.priority
+            }
+            
+            # Send notification asynchronously
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            success = loop.run_until_complete(
+                send_property_alert(recipient, property_data)
+            )
+            
+            loop.close()
+            
+            if success:
+                return NotificationResult(
+                    status=NotificationStatus.SUCCESS,
+                    message_id=f"telegram_{recipient}_{message.title[:20]}"
+                )
+            else:
+                return NotificationResult(
+                    status=NotificationStatus.FAILED,
+                    error_message="Failed to send telegram notification"
+                )
+                
+        except Exception as e:
+            logger.error("Error sending Telegram notification: %s", str(e))
+            return NotificationResult(
+                status=NotificationStatus.FAILED,
+                error_message=f"Telegram send error: {str(e)}"
+            )
             logger.info("📱 Message content: %s", formatted_message)
             
             # In production, this would be:

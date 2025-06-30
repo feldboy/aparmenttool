@@ -71,7 +71,11 @@ class RealtyBot:
         await self.application.updater.start_polling()
         
         # Keep the bot running
-        await self.application.updater.idle()
+        try:
+            while True:
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            await self.stop()
         
     async def stop(self):
         """Stop the bot"""

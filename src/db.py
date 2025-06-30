@@ -156,6 +156,22 @@ class SentNotification(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
+class FacebookCredentials(BaseModel):
+    """Facebook credentials model for group scanning"""
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
+    telegram_chat_id: str
+    email: str
+    password: str  # Should be encrypted in production
+    groups: List[str] = []  # List of Facebook group URLs or names
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
 class DatabaseManager:
     """MongoDB database manager"""
     
@@ -165,6 +181,8 @@ class DatabaseManager:
         self.user_profiles: Optional[Collection] = None
         self.scanned_listings: Optional[Collection] = None
         self.sent_notifications: Optional[Collection] = None
+        self.search_profiles: Optional[Collection] = None
+        self.facebook_credentials: Optional[Collection] = None
         
     def connect(self) -> bool:
         """Connect to MongoDB database"""
@@ -184,6 +202,8 @@ class DatabaseManager:
             self.user_profiles = self.db.user_profiles
             self.scanned_listings = self.db.scanned_listings
             self.sent_notifications = self.db.sent_notifications
+            self.search_profiles = self.db.search_profiles
+            self.facebook_credentials = self.db.facebook_credentials
             
             # Create indexes for better performance
             self._create_indexes()
@@ -317,4 +337,6 @@ db_manager = DatabaseManager()
 
 def get_db() -> DatabaseManager:
     """Get database manager instance"""
+    if not db_manager.client:
+        db_manager.connect()
     return db_manager

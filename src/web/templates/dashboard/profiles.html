@@ -1,0 +1,98 @@
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+            <i class="fas fa-search me-2"></i>
+            פרופילי חיפוש
+        </h1>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" onclick="exportProfiles()">
+                <i class="fas fa-download me-2"></i>
+                ייצא
+            </button>
+            <button class="btn btn-primary" onclick="showAddProfileModal()">
+                <i class="fas fa-plus me-2"></i>
+                הוסף פרופיל חדש
+            </button>
+        </div>
+    </div>
+
+    <!-- Profiles Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-select" id="profile-filter" onchange="filterProfiles()">
+                        <option value="all">כל הפרופילים</option>
+                        <option value="active">פעילים בלבד</option>
+                        <option value="inactive">לא פעילים</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="profile-search" 
+                           placeholder="חפש פרופילים..." onkeyup="searchProfiles()">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="profile-sort" onchange="sortProfiles()">
+                        <option value="created_desc">נוצר לאחרונה</option>
+                        <option value="created_asc">נוצר ראשון</option>
+                        <option value="name_asc">שם א-ת</option>
+                        <option value="name_desc">שם ת-א</option>
+                        <option value="active_first">פעילים ראשון</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profiles Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary" id="total-profiles-count">0</h5>
+                    <p class="card-text">סה"כ פרופילים</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success" id="active-profiles-count">0</h5>
+                    <p class="card-text">פעילים</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-info" id="matches-today">0</h5>
+                    <p class="card-text">התאמות היום</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-warning" id="notifications-pending">0</h5>
+                    <p class="card-text">התראות ממתינות</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profiles List -->
+    <div class="row" id="profiles-list">
+        <!-- Profiles will be loaded here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="profiles-empty" class="text-center py-5" style="display: none;">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h4>אין פרופילי חיפוש</h4>
+        <p class="text-muted">צור את הפרופיל הראשון שלך כדי להתחיל לקבל התראות על דירות</p>
+        <button class="btn btn-primary" onclick="showAddProfileModal()">
+            <i class="fas fa-plus me-2"></i>
+            צור פרופיל ראשון
+        </button>
+    </div>
+</div>

@@ -22,7 +22,8 @@ from pathlib import Path
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from telegram_bot import RealtyBot, init_bot
+from telegram_bot.bot import RealtyBot, init_bot
+from telegram_bot import setup_handlers
 
 # Configure logging
 logging.basicConfig(

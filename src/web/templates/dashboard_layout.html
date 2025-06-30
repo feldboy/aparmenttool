@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealtyScanner - מסך ניהול</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <button class="navbar-toggler d-lg-none" type="button" onclick="toggleSidebar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-home me-2"></i>
+                RealtyScanner
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>
+                        משתמש
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>הגדרות</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>התנתק</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 sidebar" id="sidebar">
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="/" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>דשבורד
+                    </a>
+                    <a class="nav-link" href="/profiles" data-page="profiles">
+                        <i class="fas fa-search"></i>פרופילי חיפוש
+                    </a>
+                    <a class="nav-link" href="/telegram" data-page="telegram">
+                        <i class="fab fa-telegram"></i>הגדרות טלגרם
+                    </a>
+                    <a class="nav-link" href="/facebook" data-page="facebook">
+                        <i class="fab fa-facebook"></i>הגדרות פייסבוק
+                    </a>
+                    <a class="nav-link" href="/yad2" data-page="yad2">
+                        <i class="fas fa-building"></i>הגדרות יד2
+                    </a>
+                    <a class="nav-link" href="/notifications" data-page="notifications">
+                        <i class="fas fa-bell"></i>התראות
+                    </a>
+                    <a class="nav-link" href="/settings" data-page="settings">
+                        <i class="fas fa-cog"></i>הגדרות כלליות
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9 main-content">
+                <div id="page-content">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals Container -->
+    <div id="modals-container">
+        <!-- Modals will be loaded here as needed -->
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/profiles.js"></script>
+    <script src="/static/js/yad2.js"></script>
+    <script src="/static/js/facebook.js"></script>
+    <script src="/static/js/telegram.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/settings.js"></script>
+</body>
+</html>

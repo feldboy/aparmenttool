@@ -61,13 +61,21 @@ def setup_routes(app: FastAPI):
     """Setup API routes"""
     
     from .auth import auth_router
-    from .api import api_router
+    from .api import create_api_router
     from .websocket import websocket_router
     
-    # Include routers
-    app.include_router(auth_router, prefix="/auth", tags=["authentication"])
-    app.include_router(api_router, prefix="/api/v1", tags=["api"])
-    app.include_router(websocket_router, prefix="/ws", tags=["websocket"])
+    # Create API router
+    api_router = create_api_router()
+    
+    # Include routers only if they exist
+    if auth_router:
+        app.include_router(auth_router, prefix="/auth", tags=["authentication"])
+    
+    if api_router:
+        app.include_router(api_router, prefix="/api/v1", tags=["api"])
+    
+    if websocket_router:
+        app.include_router(websocket_router, prefix="/ws", tags=["websocket"])
     
     # Root route
     @app.get("/")

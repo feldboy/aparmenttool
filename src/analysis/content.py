@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-from scrapers import ScrapedListing
+from scrapers.base import ScrapedListing
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ class ContentAnalyzer:
     """Content analysis and filtering engine"""
     
     def __init__(self):
+        """Initialize the content analyzer"""
         self.logger = logging.getLogger(f"{__name__}.ContentAnalyzer")
         
         # Hebrew/English normalization mappings
@@ -81,7 +82,18 @@ class ContentAnalyzer:
             'נווה צדק': ['neve tzedek'],
             'יפו העתיקה': ['old jaffa', 'jaffa'],
         }
-    
+        
+        # Initialize Tavily for enhanced analysis
+        try:
+            from search.tavily import get_tavily_searcher
+            self.tavily = get_tavily_searcher()
+            self.use_tavily = True
+            logger.info("Tavily integration enabled for enhanced content analysis")
+        except ImportError:
+            self.tavily = None
+            self.use_tavily = False
+            logger.warning("Tavily not available - using basic analysis only")
+
     def analyze_listing(self, listing: ScrapedListing, profile_criteria: Dict[str, Any]) -> MatchResult:
         """
         Analyze a listing against profile criteria
@@ -372,3 +384,86 @@ class ContentAnalyzer:
         )
         
         return sorted_matches
+
+    async def analyze_with_web_context(self, listing: ScrapedListing, profile: Dict[str, Any]) -> MatchResult:
+        """
+        Enhanced analysis using Tavily web search for additional context
+        
+        Args:
+            listing: Property listing to analyze
+            profile: User search profile
+            
+        Returns:
+            Enhanced match result with web context
+        """
+        # First run standard analysis
+        basic_result = self.analyze_listing(listing, profile)
+        
+        # If Tavily is not available, return basic result
+        if not self.use_tavily:
+            return basic_result
+        
+        try:
+            # Extract location for neighborhood search
+            location_criteria = profile.get('location_criteria', {})
+            city = location_criteria.get('city', '')
+            
+            # Enhanced checks using Tavily
+            enhanced_reasons = list(basic_result.reasons)
+            enhanced_score = basic_result.score
+            
+            # Check neighborhood information if available
+            if city and listing.location:
+                neighborhood_info = await self.tavily.search_neighborhood_info(
+                    listing.location, city
+                )
+                if neighborhood_info.get('summary'):
+                    enhanced_reasons.append(f"Neighborhood context: {neighborhood_info['summary'][:100]}...")
+                    enhanced_score += 0.1  # Bonus for having neighborhood context
+            
+            # Verify listing legitimacy
+            if listing.url:
+                legitimacy_check = await self.tavily.verify_listing_legitimacy(
+                    listing.url, listing.title or ""
+                )
+                legitimacy_score = legitimacy_check.get('legitimacy_score', 100)
+                
+                if legitimacy_score < 70:
+                    enhanced_reasons.append(f"Legitimacy concern (score: {legitimacy_score})")
+                    enhanced_score *= 0.8  # Reduce score for suspicious listings
+                elif legitimacy_score > 90:
+                    enhanced_reasons.append("High legitimacy confidence")
+                    enhanced_score += 0.05
+            
+            # Market context search
+            if listing.price and city:
+                try:
+                    market_trends = await self.tavily.search_market_trends(city, "apartment")
+                    if market_trends.get('answer'):
+                        enhanced_reasons.append(f"Market context available")
+                        enhanced_score += 0.05
+                except Exception as e:
+                    logger.warning("Market trends search failed: %s", str(e))
+            
+            # Update confidence based on enhanced score
+            enhanced_confidence = self._calculate_confidence(
+                enhanced_score, 
+                basic_result.price_match, 
+                basic_result.rooms_match, 
+                len(basic_result.location_matches)
+            )
+            
+            return MatchResult(
+                is_match=enhanced_score >= 0.5,
+                confidence=enhanced_confidence,
+                score=enhanced_score,
+                reasons=enhanced_reasons,
+                location_matches=basic_result.location_matches,
+                price_match=basic_result.price_match,
+                rooms_match=basic_result.rooms_match,
+                keyword_matches=basic_result.keyword_matches
+            )
+            
+        except Exception as e:
+            logger.error("Enhanced analysis failed, using basic result: %s", str(e))
+            return basic_result

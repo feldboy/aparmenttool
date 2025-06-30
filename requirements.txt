@@ -21,3 +21,6 @@ python-jose[cryptography]>=3.3.0
 websockets>=13.1
 aiofiles>=24.1.0
 itsdangerous>=2.2.0
+
+# Tavily API for enhanced web search
+tavily-python>=0.3.0

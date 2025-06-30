@@ -1,0 +1,161 @@
+<div class="page-header">
+    <h2><i class="fas fa-building"></i> Yad2 Management</h2>
+    <p class="page-description">Manage Yad2 search URLs and scanning settings</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-link"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="total-urls">0</h3>
+            <p>Total URLs</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="active-urls">0</h3>
+            <p>Active URLs</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="properties-found">0</h3>
+            <p>Properties Found</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="last-scan">N/A</h3>
+            <p>Last Scan</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h3>Yad2 URLs</h3>
+        <div class="section-actions">
+            <button class="btn btn-primary" onclick="yad2Manager.showAddUrlModal()">
+                <i class="fas fa-plus"></i> Add URL
+            </button>
+            <button class="btn btn-secondary" onclick="yad2Manager.scanAllUrls()">
+                <i class="fas fa-search"></i> Scan All
+            </button>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="filter-group">
+            <input type="text" id="url-search" placeholder="Search URLs..." class="form-control">
+        </div>
+        <div class="filter-group">
+            <select id="url-status-filter" class="form-control">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="error">Error</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <select id="url-sort" class="form-control">
+                <option value="created_desc">Newest First</option>
+                <option value="created_asc">Oldest First</option>
+                <option value="name_asc">Name A-Z</option>
+                <option value="name_desc">Name Z-A</option>
+                <option value="last_scan">Last Scan</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>Status</th>
+                    <th>Last Scan</th>
+                    <th>Properties Found</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="urls-table-body">
+                <!-- URLs will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="no-urls-message" class="empty-state" style="display: none;">
+        <i class="fas fa-link"></i>
+        <h3>No Yad2 URLs</h3>
+        <p>Add your first Yad2 search URL to start monitoring properties.</p>
+        <button class="btn btn-primary" onclick="yad2Manager.showAddUrlModal()">
+            <i class="fas fa-plus"></i> Add URL
+        </button>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h3>Scanning Settings</h3>
+    </div>
+
+    <div class="settings-grid">
+        <div class="setting-item">
+            <label for="scan-interval">Scan Interval (minutes)</label>
+            <input type="number" id="scan-interval" class="form-control" min="5" max="1440" value="30">
+            <small class="help-text">How often to scan for new properties (5-1440 minutes)</small>
+        </div>
+        <div class="setting-item">
+            <label for="max-properties">Max Properties per URL</label>
+            <input type="number" id="max-properties" class="form-control" min="10" max="500" value="100">
+            <small class="help-text">Maximum number of properties to track per URL</small>
+        </div>
+        <div class="setting-item">
+            <label for="enable-notifications">Enable Notifications</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="enable-notifications" checked>
+                <label for="enable-notifications"></label>
+            </div>
+            <small class="help-text">Send notifications when new properties are found</small>
+        </div>
+        <div class="setting-item">
+            <label for="auto-scan">Auto Scan</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="auto-scan" checked>
+                <label for="auto-scan"></label>
+            </div>
+            <small class="help-text">Automatically scan URLs at regular intervals</small>
+        </div>
+    </div>
+
+    <div class="section-actions">
+        <button class="btn btn-primary" onclick="yad2Manager.saveSettings()">
+            <i class="fas fa-save"></i> Save Settings
+        </button>
+        <button class="btn btn-secondary" onclick="yad2Manager.testConnection()">
+            <i class="fas fa-wifi"></i> Test Connection
+        </button>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h3>Recent Activity</h3>
+    </div>
+
+    <div class="activity-list" id="yad2-activity">
+        <!-- Activity items will be populated by JavaScript -->
+    </div>
+</div>

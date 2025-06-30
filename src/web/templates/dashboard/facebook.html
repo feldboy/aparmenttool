@@ -1,0 +1,130 @@
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">
+            <i class="fab fa-facebook me-2"></i>
+            הגדרות פייסבוק
+        </h1>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" onclick="refreshFacebookStatus()">
+                <i class="fas fa-sync-alt me-2"></i>
+                רענן סטטוס
+            </button>
+            <button class="btn btn-outline-info" onclick="showFacebookHelp()">
+                <i class="fas fa-question-circle me-2"></i>
+                עזרה
+            </button>
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">סטטוס חיבור</h5>
+        </div>
+        <div class="card-body">
+            <div id="facebook-status" class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                <span>בודק סטטוס...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Section -->
+    <div class="card mb-4" id="facebook-login-section">
+        <div class="card-header">
+            <h5 class="mb-0">התחברות לפייסבוק</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>שים לב:</strong> אנו נשתמש בחשבון הפייסבוק שלך רק לקריאת פוסטים מקבוצות ציבוריות. לא נפרסם דבר בשמך.
+            </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>הסבר:</strong> המערכת תסרוק קבוצות פייסבוק שתבחר ותחפש פוסטים על דירות להשכרה. 
+                כאשר תימצא דירה שמתאימה לפרופילי החיפוש שלך, תקבל התראה.
+            </div>
+            <button class="btn btn-primary" onclick="connectFacebook()">
+                <i class="fab fa-facebook me-2"></i>
+                התחבר לפייסבוק
+            </button>
+        </div>
+    </div>
+
+    <!-- Groups Configuration -->
+    <div class="card" id="facebook-groups-section" style="display: none;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">קבוצות פייסבוק לסריקה</h5>
+            <button class="btn btn-sm btn-outline-primary" onclick="addFacebookGroup()">
+                <i class="fas fa-plus me-1"></i>
+                הוסף קבוצה
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-lightbulb me-2"></i>
+                <strong>טיפ:</strong> מומלץ להוסיף קבוצות פעילות בערים שמעניינות אותך. 
+                לדוגמה: "דירות להשכרה תל אביב", "השכרת דירות ירושלים" וכדומה.
+            </div>
+            
+            <!-- Groups Stats -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary" id="total-groups">0</h6>
+                            <p class="card-text small">סה"כ קבוצות</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-success" id="active-groups">0</h6>
+                            <p class="card-text small">קבוצות פעילות</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-info" id="posts-today">0</h6>
+                            <p class="card-text small">פוסטים סרוקים היום</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="facebook-groups-list">
+                <!-- Groups will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Facebook Tips -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">טיפים ומידע שימושי</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-users me-2"></i>איך למצוא קבוצות טובות?</h6>
+                    <ul class="small">
+                        <li>חפש בפייסבוק "דירות להשכרה [שם העיר]"</li>
+                        <li>הצטרף לקבוצות עם הרבה חברים ופעילות</li>
+                        <li>וודא שהקבוצות ציבוריות או מאמתות חברים מהר</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-clock me-2"></i>תדירות סריקה</h6>
+                    <ul class="small">
+                        <li>המערכת בודקת קבוצות כל 5-10 דקות</li>
+                        <li>פוסטים חדשים מתורגמים ומנותחים אוטומטית</li>
+                        <li>תקבל התראה רק על דירות שמתאימות לפרופילים שלך</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

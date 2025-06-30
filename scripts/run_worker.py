@@ -17,10 +17,12 @@ from datetime import datetime, timedelta
 from typing import Dict, Any
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+project_root = Path(__file__).parent.parent
+src_path = project_root / "src"
+sys.path.insert(0, str(src_path))
 
 # Configure logging
-log_dir = os.getenv('LOG_DIR', '/app/logs')
+log_dir = os.getenv('LOG_DIR', './logs')
 os.makedirs(log_dir, exist_ok=True)
 
 logging.basicConfig(
@@ -48,11 +50,11 @@ class RealtyWorker:
         """Initialize worker components"""
         try:
             # Import components (with error handling for missing dependencies)
-            from db import get_database
+            from db import get_db
             from notifications.dispatcher import NotificationDispatcher
             
             # Initialize database connection
-            self.db = get_database()
+            self.db = get_db()
             logger.info("Database connection established")
             
             # Initialize notification dispatcher
@@ -79,6 +81,7 @@ class RealtyWorker:
             except ImportError as e:
                 logger.warning(f"Content analyzer not available: {e}")
                 self.content_analyzer = None
+                self.content_analyzer = None
                 
         except Exception as e:
             logger.error(f"Failed to initialize worker components: {e}")
@@ -89,17 +92,33 @@ class RealtyWorker:
         try:
             logger.info("Starting profile scanning cycle")
             
+            # Check if database is available
+            if not self.db:
+                logger.error("Database not available")
+                return
+            
             # Get active profiles from database
-            profiles_collection = self.db.user_profiles
-            active_profiles = profiles_collection.find({"isActive": True})
+            # First try to get search_profiles (new collection)
+            if hasattr(self.db, 'search_profiles'):
+                active_profiles = self.db.search_profiles.find({"is_active": True})
+                active_profiles = list(active_profiles)
+            # Fallback to user_profiles
+            elif hasattr(self.db, 'user_profiles'):
+                active_profiles = self.db.user_profiles.find({"isActive": True})
+                active_profiles = list(active_profiles)
+            else:
+                logger.error("No profiles collection found")
+                return
             
             profile_count = 0
             total_matches = 0
             
+            logger.info(f"Found {len(active_profiles)} active profiles")
+            
             for profile in active_profiles:
                 try:
                     profile_count += 1
-                    logger.info(f"Processing profile: {profile.get('profileName', 'Unknown')}")
+                    logger.info(f"Processing profile: {profile.get('name', profile.get('profileName', 'Unknown'))}")
                     
                     # Scan Yad2 if scraper is available
                     yad2_listings = []
@@ -117,6 +136,7 @@ class RealtyWorker:
                             facebook_posts = await self.scan_facebook_for_profile(profile)
                             logger.info(f"Found {len(facebook_posts)} new Facebook posts")
                         except Exception as e:
+                            logger.error(f"Facebook scanning failed for profile {profile['_id']}: {e}")
                             logger.error(f"Facebook scanning failed for profile {profile['_id']}: {e}")
                     
                     # Analyze and filter content
@@ -156,19 +176,55 @@ class RealtyWorker:
         return []
     
     async def analyze_listings(self, profile: Dict[str, Any], listings: list):
-        """Analyze listings against profile criteria"""
-        if not self.content_analyzer or not listings:
+        """Analyze listings against profile criteria with enhanced AI analysis"""
+        if not listings:
             return []
         
         matches = []
         for listing in listings:
             try:
-                # Simulate content analysis
-                is_match = await self.simulate_content_analysis(profile, listing)
-                if is_match:
-                    matches.append(listing)
+                if self.content_analyzer:
+                    # Use enhanced analysis with Tavily if available
+                    if hasattr(self.content_analyzer, 'analyze_with_web_context'):
+                        from scrapers import ScrapedListing
+                        # Convert dict to ScrapedListing object
+                        listing_obj = ScrapedListing(
+                            title=listing.get('title', ''),
+                            description=listing.get('description', ''),
+                            price=listing.get('price'),
+                            location=listing.get('location', ''),
+                            rooms=listing.get('rooms'),
+                            url=listing.get('url', ''),
+                            images=listing.get('images', []),
+                            source=listing.get('source', 'unknown'),
+                            raw_data=listing
+                        )
+                        result = await self.content_analyzer.analyze_with_web_context(listing_obj, profile)
+                        
+                        if result and hasattr(result, 'is_match') and result.is_match:
+                            matches.append({
+                                **listing,
+                                'match_score': result.score,
+                                'match_confidence': result.confidence,
+                                'match_reasons': result.reasons
+                            })
+                            logger.info("Enhanced match found: %s (confidence: %s, score: %.2f)", 
+                                       listing.get('title', 'Unknown')[:50], 
+                                       result.confidence, 
+                                       result.score)
+                    else:
+                        # Fallback to basic analysis
+                        is_match = await self.simulate_content_analysis(profile, listing)
+                        if is_match:
+                            matches.append(listing)
+                else:
+                    # Simulation fallback
+                    is_match = await self.simulate_content_analysis(profile, listing)
+                    if is_match:
+                        matches.append(listing)
+                        
             except Exception as e:
-                logger.error(f"Error analyzing listing: {e}")
+                logger.error("Error analyzing listing: %s", str(e))
                 continue
         
         return matches
@@ -240,7 +296,10 @@ class RealtyWorker:
         """Perform health check"""
         try:
             # Check database connection
-            self.db.admin.command('ping')
+            if hasattr(self.db, 'client'):
+                self.db.client.admin.command('ping')
+            else:
+                logger.warning("Database client not available for health check")
             
             # Check if we're scanning regularly
             if self.last_scan:
@@ -320,7 +379,7 @@ async def main():
 
 if __name__ == "__main__":
     # Ensure log directory exists
-    os.makedirs('/app/logs', exist_ok=True)
+    os.makedirs('./logs', exist_ok=True)
     
     # Run the worker
     exit_code = asyncio.run(main())

@@ -1,0 +1,359 @@
+<div class="page-header">
+    <h2><i class="fas fa-cog"></i> Settings</h2>
+    <p class="page-description">Configure system settings and preferences</p>
+</div>
+
+<div class="settings-container">
+    <div class="settings-nav">
+        <ul class="nav nav-pills nav-vertical">
+            <li class="nav-item">
+                <a class="nav-link active" href="#general" onclick="settingsManager.showSection('general')">
+                    <i class="fas fa-sliders-h"></i> General
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#scanning" onclick="settingsManager.showSection('scanning')">
+                    <i class="fas fa-search"></i> Scanning
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#notifications" onclick="settingsManager.showSection('notifications')">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#storage" onclick="settingsManager.showSection('storage')">
+                    <i class="fas fa-database"></i> Storage
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#security" onclick="settingsManager.showSection('security')">
+                    <i class="fas fa-shield-alt"></i> Security
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#advanced" onclick="settingsManager.showSection('advanced')">
+                    <i class="fas fa-code"></i> Advanced
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="settings-content">
+        <!-- General Settings -->
+        <div id="general-settings" class="settings-section active">
+            <h3>General Settings</h3>
+            
+            <div class="setting-group">
+                <h4>Application</h4>
+                <div class="setting-item">
+                    <label for="app-name">Application Name</label>
+                    <input type="text" id="app-name" class="form-control" value="RealtyScanner">
+                    <small class="help-text">Display name for the application</small>
+                </div>
+                <div class="setting-item">
+                    <label for="app-language">Language</label>
+                    <select id="app-language" class="form-control">
+                        <option value="en">English</option>
+                        <option value="he" selected>עברית</option>
+                    </select>
+                    <small class="help-text">Application interface language</small>
+                </div>
+                <div class="setting-item">
+                    <label for="timezone">Timezone</label>
+                    <select id="timezone" class="form-control">
+                        <option value="Asia/Jerusalem" selected>Israel (GMT+2/+3)</option>
+                        <option value="UTC">UTC</option>
+                        <option value="Europe/London">London (GMT)</option>
+                        <option value="America/New_York">New York (EST)</option>
+                    </select>
+                    <small class="help-text">Default timezone for dates and times</small>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>Interface</h4>
+                <div class="setting-item">
+                    <label for="theme">Theme</label>
+                    <select id="theme" class="form-control">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto" selected>Auto (System)</option>
+                    </select>
+                    <small class="help-text">Application color theme</small>
+                </div>
+                <div class="setting-item">
+                    <label for="date-format">Date Format</label>
+                    <select id="date-format" class="form-control">
+                        <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="items-per-page">Items per Page</label>
+                    <select id="items-per-page" class="form-control">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scanning Settings -->
+        <div id="scanning-settings" class="settings-section">
+            <h3>Scanning Settings</h3>
+            
+            <div class="setting-group">
+                <h4>Default Intervals</h4>
+                <div class="setting-item">
+                    <label for="default-scan-interval">Default Scan Interval (minutes)</label>
+                    <input type="number" id="default-scan-interval" class="form-control" min="5" max="1440" value="30">
+                    <small class="help-text">Default interval for new scanning URLs</small>
+                </div>
+                <div class="setting-item">
+                    <label for="retry-interval">Retry Interval (minutes)</label>
+                    <input type="number" id="retry-interval" class="form-control" min="1" max="60" value="5">
+                    <small class="help-text">Interval between retry attempts for failed scans</small>
+                </div>
+                <div class="setting-item">
+                    <label for="max-retries">Max Retries</label>
+                    <input type="number" id="max-retries" class="form-control" min="1" max="10" value="3">
+                    <small class="help-text">Maximum number of retry attempts</small>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>Performance</h4>
+                <div class="setting-item">
+                    <label for="concurrent-scans">Concurrent Scans</label>
+                    <input type="number" id="concurrent-scans" class="form-control" min="1" max="10" value="3">
+                    <small class="help-text">Number of simultaneous scanning operations</small>
+                </div>
+                <div class="setting-item">
+                    <label for="request-delay">Request Delay (seconds)</label>
+                    <input type="number" id="request-delay" class="form-control" min="0" max="10" step="0.1" value="1">
+                    <small class="help-text">Delay between HTTP requests to avoid rate limiting</small>
+                </div>
+                <div class="setting-item">
+                    <label for="timeout">Request Timeout (seconds)</label>
+                    <input type="number" id="timeout" class="form-control" min="5" max="120" value="30">
+                    <small class="help-text">Timeout for HTTP requests</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Settings -->
+        <div id="notifications-settings" class="settings-section">
+            <h3>Notification Settings</h3>
+            
+            <div class="setting-group">
+                <h4>Global Settings</h4>
+                <div class="setting-item">
+                    <label for="global-notifications">Enable Notifications</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="global-notifications" checked>
+                        <label for="global-notifications"></label>
+                    </div>
+                    <small class="help-text">Master switch for all notifications</small>
+                </div>
+                <div class="setting-item">
+                    <label for="quiet-hours">Quiet Hours</label>
+                    <div class="time-range">
+                        <input type="time" id="quiet-start" class="form-control" value="23:00">
+                        <span>to</span>
+                        <input type="time" id="quiet-end" class="form-control" value="07:00">
+                    </div>
+                    <small class="help-text">Don't send notifications during these hours</small>
+                </div>
+                <div class="setting-item">
+                    <label for="max-notifications-per-hour">Max Notifications per Hour</label>
+                    <input type="number" id="max-notifications-per-hour" class="form-control" min="1" max="100" value="10">
+                    <small class="help-text">Limit to prevent notification spam</small>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>Priority Settings</h4>
+                <div class="setting-item">
+                    <label for="urgent-price-threshold">Urgent Price Threshold (%)</label>
+                    <input type="number" id="urgent-price-threshold" class="form-control" min="1" max="50" value="10">
+                    <small class="help-text">Price drop percentage that triggers urgent notifications</small>
+                </div>
+                <div class="setting-item">
+                    <label for="new-property-priority">New Property Priority</label>
+                    <select id="new-property-priority" class="form-control">
+                        <option value="low">Low</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Settings -->
+        <div id="storage-settings" class="settings-section">
+            <h3>Storage Settings</h3>
+            
+            <div class="setting-group">
+                <h4>Data Retention</h4>
+                <div class="setting-item">
+                    <label for="property-retention">Property Data Retention (days)</label>
+                    <input type="number" id="property-retention" class="form-control" min="7" max="365" value="90">
+                    <small class="help-text">How long to keep property data</small>
+                </div>
+                <div class="setting-item">
+                    <label for="log-retention">Log Retention (days)</label>
+                    <input type="number" id="log-retention" class="form-control" min="1" max="365" value="30">
+                    <small class="help-text">How long to keep application logs</small>
+                </div>
+                <div class="setting-item">
+                    <label for="notification-retention">Notification History (days)</label>
+                    <input type="number" id="notification-retention" class="form-control" min="7" max="365" value="60">
+                    <small class="help-text">How long to keep notification history</small>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>Database</h4>
+                <div class="setting-item">
+                    <label for="auto-vacuum">Auto Vacuum</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="auto-vacuum" checked>
+                        <label for="auto-vacuum"></label>
+                    </div>
+                    <small class="help-text">Automatically optimize database storage</small>
+                </div>
+                <div class="setting-item">
+                    <label for="backup-frequency">Backup Frequency</label>
+                    <select id="backup-frequency" class="form-control">
+                        <option value="daily" selected>Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="never">Never</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <button class="btn btn-secondary" onclick="settingsManager.createBackup()">
+                        <i class="fas fa-download"></i> Create Backup Now
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div id="security-settings" class="settings-section">
+            <h3>Security Settings</h3>
+            
+            <div class="setting-group">
+                <h4>Authentication</h4>
+                <div class="setting-item">
+                    <label for="session-timeout">Session Timeout (minutes)</label>
+                    <input type="number" id="session-timeout" class="form-control" min="15" max="1440" value="60">
+                    <small class="help-text">Automatically log out after inactivity</small>
+                </div>
+                <div class="setting-item">
+                    <label for="require-password">Require Password</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="require-password">
+                        <label for="require-password"></label>
+                    </div>
+                    <small class="help-text">Require password to access dashboard</small>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>API Security</h4>
+                <div class="setting-item">
+                    <label for="api-rate-limit">API Rate Limit (requests/minute)</label>
+                    <input type="number" id="api-rate-limit" class="form-control" min="10" max="1000" value="100">
+                    <small class="help-text">Maximum API requests per minute</small>
+                </div>
+                <div class="setting-item">
+                    <label for="enable-cors">Enable CORS</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="enable-cors">
+                        <label for="enable-cors"></label>
+                    </div>
+                    <small class="help-text">Allow cross-origin requests</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div id="advanced-settings" class="settings-section">
+            <h3>Advanced Settings</h3>
+            
+            <div class="setting-group">
+                <h4>Logging</h4>
+                <div class="setting-item">
+                    <label for="log-level">Log Level</label>
+                    <select id="log-level" class="form-control">
+                        <option value="DEBUG">Debug</option>
+                        <option value="INFO" selected>Info</option>
+                        <option value="WARNING">Warning</option>
+                        <option value="ERROR">Error</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="enable-file-logging">Enable File Logging</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="enable-file-logging" checked>
+                        <label for="enable-file-logging"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>Development</h4>
+                <div class="setting-item">
+                    <label for="debug-mode">Debug Mode</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="debug-mode">
+                        <label for="debug-mode"></label>
+                    </div>
+                    <small class="help-text">Enable debug features and verbose logging</small>
+                </div>
+                <div class="setting-item">
+                    <label for="mock-data">Use Mock Data</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="mock-data">
+                        <label for="mock-data"></label>
+                    </div>
+                    <small class="help-text">Use mock data for testing</small>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h4>System</h4>
+                <div class="setting-item">
+                    <button class="btn btn-warning" onclick="settingsManager.resetSettings()">
+                        <i class="fas fa-undo"></i> Reset to Defaults
+                    </button>
+                </div>
+                <div class="setting-item">
+                    <button class="btn btn-danger" onclick="settingsManager.clearAllData()">
+                        <i class="fas fa-trash"></i> Clear All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="settings-footer">
+    <button class="btn btn-primary" onclick="settingsManager.saveAllSettings()">
+        <i class="fas fa-save"></i> Save All Settings
+    </button>
+    <button class="btn btn-secondary" onclick="settingsManager.exportSettings()">
+        <i class="fas fa-download"></i> Export Settings
+    </button>
+    <button class="btn btn-secondary" onclick="settingsManager.importSettings()">
+        <i class="fas fa-upload"></i> Import Settings
+    </button>
+</div>
+
+<input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="settingsManager.handleImportFile(event)">

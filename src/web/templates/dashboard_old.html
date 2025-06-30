@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealtyScanner - מסך ניהול</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-bg);
+            direction: rtl;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar {
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            min-height: calc(100vh - 76px);
+            padding: 0;
+        }
+        
+        .sidebar .nav-link {
+            color: var(--primary-color);
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateX(-5px);
+        }
+        
+        .sidebar .nav-link i {
+            margin-left: 10px;
+            width: 20px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 2px solid var(--secondary-color);
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        
+        .status-connected { background-color: var(--success-color); }
+        .status-disconnected { background-color: var(--danger-color); }
+        .status-warning { background-color: var(--warning-color); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .alert-telegram {
+            background: linear-gradient(135deg, #0088cc, #229ED9);
+            color: white;
+            border: none;
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .metric-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+            border-left: 4px solid #28a745;
+        }
+        .property-card.high-match {
+            border-left-color: #dc3545;
+        }
+        .property-card.medium-match {
+            border-left-color: #ffc107;
+        }
+        .property-card.low-match {
+            border-left-color: #6c757d;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white"><i class="bi bi-house-fill"></i> RealtyScanner</h4>
+                        <small class="text-white-50">Property Management Dashboard</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#profiles">
+                                <i class="bi bi-person-lines-fill"></i> Search Profiles
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#facebook">
+                                <i class="bi bi-facebook"></i> Facebook Integration
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#notifications">
+                                <i class="bi bi-bell-fill"></i> Notifications
+                                <span class="notification-badge ms-2">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#properties">
+                                <i class="bi bi-building"></i> Properties
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#analytics">
+                                <i class="bi bi-graph-up"></i> Analytics
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#settings">
+                                <i class="bi bi-gear-fill"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <strong>Admin User</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
+                            <li><a class="dropdown-item" href="#profile">Profile</a></li>
+                            <li><a class="dropdown-item" href="#settings">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#logout">Sign out</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle"></i> New Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">Active Profiles</h6>
+                                        <h2 class="text-white">42</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-person-lines-fill fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">Today's Notifications</h6>
+                                        <h2 class="text-white">156</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-bell-fill fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">New Properties</h6>
+                                        <h2 class="text-white">89</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-building fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h6 class="card-title text-white-50">Success Rate</h6>
+                                        <h2 class="text-white">98.7%</h2>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="bi bi-check-circle-fill fs-1 text-white-50"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-activity"></i> System Status
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-online"></span>
+                                            <strong>Database</strong>
+                                        </div>
+                                        <small class="text-muted">Connected</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-online"></span>
+                                            <strong>Telegram Bot</strong>
+                                        </div>
+                                        <small class="text-muted">Running</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-online"></span>
+                                            <strong>Scrapers</strong>
+                                        </div>
+                                        <small class="text-muted">Active</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="status-indicator status-warning"></span>
+                                            <strong>Notifications</strong>
+                                        </div>
+                                        <small class="text-muted">3 pending</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Properties -->
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-building"></i> Recent Property Matches
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="property-card card mb-3 high-match">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">Beautiful 2-room in Florentin</h6>
+                                                <p class="card-text text-muted">4,800 ILS/month • 2 rooms • Florentin, Tel Aviv</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 15 minutes ago • 
+                                                    <i class="bi bi-target"></i> 94% match
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-danger">High Match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="property-card card mb-3 medium-match">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">Modern studio near Rothschild</h6>
+                                                <p class="card-text text-muted">5,200 ILS/month • 1 room • City Center, Tel Aviv</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 1 hour ago • 
+                                                    <i class="bi bi-target"></i> 76% match
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-warning">Medium Match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="property-card card mb-3 low-match">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <h6 class="card-title">Spacious 3-room apartment</h6>
+                                                <p class="card-text text-muted">6,800 ILS/month • 3 rooms • Ramat Aviv, Tel Aviv</p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-clock"></i> 2 hours ago • 
+                                                    <i class="bi bi-target"></i> 62% match
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-secondary">Low Match</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-bell"></i> Recent Notifications
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="me-3">
+                                        <i class="bi bi-telegram text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">Telegram</small>
+                                        <p class="mb-1 small">Property notification sent to @user123</p>
+                                        <small class="text-muted">5 minutes ago</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="me-3">
+                                        <i class="bi bi-envelope text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">Email</small>
+                                        <p class="mb-1 small">Weekly digest sent to user@example.com</p>
+                                        <small class="text-muted">2 hours ago</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <i class="bi bi-whatsapp text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted">WhatsApp</small>
+                                        <p class="mb-1 small">Property alert sent to +972501234567</p>
+                                        <small class="text-muted">4 hours ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facebook Integration Section -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-facebook"></i> Facebook Integration
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="facebook-status">
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        <strong>Facebook Integration Not Set Up</strong>
+                                        <p class="mb-3">To scan Facebook groups for apartment listings, please provide your Facebook credentials.</p>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#facebookModal">
+                                            <i class="bi bi-facebook"></i> Setup Facebook Integration
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="facebook-configured" style="display: none;">
+                                    <div class="alert alert-success" role="alert">
+                                        <i class="bi bi-check-circle"></i>
+                                        <strong>Facebook Integration Active</strong>
+                                        <p class="mb-3">Monitoring <span id="groups-count">0</span> Facebook groups for new listings.</p>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small class="text-muted">Email: <span id="facebook-email">-</span></small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="text-muted">Last scan: <span id="last-scan">-</span></small>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#facebookModal">
+                                                <i class="bi bi-pencil"></i> Edit Settings
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" onclick="testFacebookConnection()">
+                                                <i class="bi bi-arrow-clockwise"></i> Test Connection
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteFacebookCredentials()">
+                                                <i class="bi bi-trash"></i> Remove Integration
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Facebook Setup Modal -->
+    <div class="modal fade" id="facebookModal" tabindex="-1" aria-labelledby="facebookModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="facebookModalLabel">
+                        <i class="bi bi-facebook"></i> Facebook Integration Setup
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="facebookForm">
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Privacy Notice:</strong> Your Facebook credentials are encrypted and stored securely. They are only used for automated property searching in the groups you specify.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="facebookEmail" class="form-label">Facebook Email</label>
+                            <input type="email" class="form-control" id="facebookEmail" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="facebookPassword" class="form-label">Facebook Password</label>
+                            <input type="password" class="form-control" id="facebookPassword" required>
+                            <div class="form-text">Your password will be encrypted before storage.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="facebookGroups" class="form-label">Facebook Groups</label>
+                            <textarea class="form-control" id="facebookGroups" rows="4" 
+                                      placeholder="Enter Facebook group URLs or names, one per line:&#10;facebook.com/groups/telavivrentals&#10;facebook.com/groups/jerusalemapartments&#10;דירות להשכרה תל אביב"></textarea>
+                            <div class="form-text">You can provide group URLs or group names. One per line.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFacebookCredentials()">
+                        <i class="bi bi-save"></i> Save & Test Connection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // WebSocket connection for real-time updates
+        let ws;
+        
+        function connectWebSocket() {
+            ws = new WebSocket(`ws://localhost:8000/ws/notifications/admin`);
+            
+            ws.onopen = function(event) {
+                console.log('WebSocket connected');
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleRealTimeUpdate(data);
+            };
+            
+            ws.onclose = function(event) {
+                console.log('WebSocket disconnected');
+                // Attempt to reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+        
+        function handleRealTimeUpdate(data) {
+            console.log('Real-time update received:', data);
+            
+            if (data.type === 'property_match') {
+                showNewPropertyNotification(data.data);
+            } else if (data.type === 'notification_update') {
+                updateNotificationsList();
+            } else if (data.type === 'system_status') {
+                updateSystemStatus(data.data);
+            }
+        }
+        
+        function showNewPropertyNotification(propertyData) {
+            // Show toast notification for new property
+            const toast = `
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <i class="bi bi-building text-primary me-2"></i>
+                        <strong class="me-auto">New Property Match</strong>
+                        <small>Just now</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${propertyData.property.title} - ${propertyData.property.price} ILS
+                    </div>
+                </div>
+            `;
+            
+            // Add toast to page and show it
+            document.body.insertAdjacentHTML('beforeend', toast);
+            const toastElement = document.querySelector('.toast:last-child');
+            const bsToast = new bootstrap.Toast(toastElement);
+            bsToast.show();
+        }
+        
+        // Initialize WebSocket connection
+        connectWebSocket();
+        
+        // Update counters every 30 seconds
+        setInterval(updateDashboardStats, 30000);
+        
+        function updateDashboardStats() {
+            // Fetch and update dashboard statistics
+            fetch('/api/v1/notifications/stats')
+                .then(response => response.json())
+                .then(data => {
+                    // Update statistics cards
+                    console.log('Updated stats:', data);
+                })
+                .catch(error => console.error('Error updating stats:', error));
+        }
+
+        // Facebook Integration Functions
+        function loadFacebookStatus() {
+            fetch('/api/v1/facebook/credentials')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.has_credentials) {
+                        document.getElementById('facebook-status').style.display = 'none';
+                        document.getElementById('facebook-configured').style.display = 'block';
+                        document.getElementById('facebook-email').textContent = data.email || '-';
+                        document.getElementById('groups-count').textContent = data.groups_count || 0;
+                        document.getElementById('last-scan').textContent = data.last_updated || 'Never';
+                    } else {
+                        document.getElementById('facebook-status').style.display = 'block';
+                        document.getElementById('facebook-configured').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading Facebook status:', error);
+                });
+        }
+
+        function saveFacebookCredentials() {
+            const email = document.getElementById('facebookEmail').value;
+            const password = document.getElementById('facebookPassword').value;
+            const groupsText = document.getElementById('facebookGroups').value;
+            const groups = groupsText.split('\\n').filter(g => g.trim()).map(g => g.trim());
+
+            if (!email || !password) {
+                alert('Please fill in both email and password.');
+                return;
+            }
+
+            const credentials = {
+                email: email,
+                password: password,
+                groups: groups
+            };
+
+            fetch('/api/v1/facebook/credentials', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Facebook credentials saved successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('facebookModal'));
+                    modal.hide();
+                    loadFacebookStatus();
+                    // Clear form
+                    document.getElementById('facebookForm').reset();
+                } else {
+                    alert('Error saving credentials: ' + (data.detail || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error saving Facebook credentials:', error);
+                alert('Error saving credentials. Please try again.');
+            });
+        }
+
+        function testFacebookConnection() {
+            fetch('/api/v1/facebook/test', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Facebook connection test successful!\\n' + data.message);
+                } else {
+                    alert('Facebook connection test failed: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error testing Facebook connection:', error);
+                alert('Error testing connection. Please try again.');
+            });
+        }
+
+        function deleteFacebookCredentials() {
+            if (confirm('Are you sure you want to remove Facebook integration? This will stop monitoring Facebook groups.')) {
+                fetch('/api/v1/facebook/credentials', {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Facebook integration removed successfully.');
+                    loadFacebookStatus();
+                })
+                .catch(error => {
+                    console.error('Error deleting Facebook credentials:', error);
+                    alert('Error removing integration. Please try again.');
+                });
+            }
+        }
+
+        // Load Facebook status on page load
+        loadFacebookStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!-- Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profileModalTitle">הוסף פרופיל חיפוש חדש</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <input type="hidden" id="profileId" value="">
+                    
+                    <div class="mb-3">
+                        <label for="profileName" class="form-label">שם הפרופיל *</label>
+                        <input type="text" class="form-control" id="profileName" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="minPrice" class="form-label">מחיר מינימום (₪)</label>
+                                <input type="number" class="form-control" id="minPrice" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="maxPrice" class="form-label">מחיר מקסימום (₪)</label>
+                                <input type="number" class="form-control" id="maxPrice" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="minRooms" class="form-label">מינימום חדרים</label>
+                                <select class="form-select" id="minRooms">
+                                    <option value="">לא משנה</option>
+                                    <option value="1">1</option>
+                                    <option value="1.5">1.5</option>
+                                    <option value="2">2</option>
+                                    <option value="2.5">2.5</option>
+                                    <option value="3">3</option>
+                                    <option value="3.5">3.5</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5+</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="maxRooms" class="form-label">מקסימום חדרים</label>
+                                <select class="form-select" id="maxRooms">
+                                    <option value="">לא משנה</option>
+                                    <option value="1">1</option>
+                                    <option value="1.5">1.5</option>
+                                    <option value="2">2</option>
+                                    <option value="2.5">2.5</option>
+                                    <option value="3">3</option>
+                                    <option value="3.5">3.5</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5+</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="city" class="form-label">עיר</label>
+                        <select class="form-select" id="city">
+                            <option value="">בחר עיר</option>
+                            <option value="תל אביב - יפו">תל אביב - יפו</option>
+                            <option value="ירושלים">ירושלים</option>
+                            <option value="חיפה">חיפה</option>
+                            <option value="ראשון לציון">ראשון לציון</option>
+                            <option value="פתח תקווה">פתח תקווה</option>
+                            <option value="אשדוד">אשדוד</option>
+                            <option value="נתניה">נתניה</option>
+                            <option value="באר שבע">באר שבע</option>
+                            <option value="בני ברק">בני ברק</option>
+                            <option value="רמת גן">רמת גן</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="neighborhoods" class="form-label">שכונות (אופציונלי)</label>
+                        <input type="text" class="form-control" id="neighborhoods" 
+                               placeholder="הזן שכונות מופרדות בפסיק">
+                        <div class="form-text">לדוגמה: פלורנטין, נווה צדק, רוטשילד</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">סוגי נכסים</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="apartment" value="דירה" checked>
+                                    <label class="form-check-label" for="apartment">דירה</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="garden-apartment" value="דירת גן">
+                                    <label class="form-check-label" for="garden-apartment">דירת גן</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="penthouse" value="פנטהאוז">
+                                    <label class="form-check-label" for="penthouse">פנטהאוז</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="house" value="בית">
+                                    <label class="form-check-label" for="house">בית</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="studio" value="סטודיו">
+                                    <label class="form-check-label" for="studio">סטודיו</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="loft" value="לופט">
+                                    <label class="form-check-label" for="loft">לופט</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isActive" checked>
+                        <label class="form-check-label" for="isActive">
+                            פרופיל פעיל (קבל התראות)
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfile()">שמור פרופיל</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Facebook Group Modal -->
+<div class="modal fade" id="facebookGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">הוסף קבוצת פייסבוק</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="facebookGroupForm">
+                    <div class="mb-3">
+                        <label for="groupUrl" class="form-label">כתובת הקבוצה *</label>
+                        <input type="url" class="form-control" id="groupUrl" required
+                               placeholder="https://facebook.com/groups/...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="groupName" class="form-label">שם הקבוצה</label>
+                        <input type="text" class="form-control" id="groupName"
+                               placeholder="השם יתמלא אוטומטיות">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="groupActive" checked>
+                        <label class="form-check-label" for="groupActive">
+                            קבוצה פעילה לסריקה
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+                <button type="button" class="btn btn-primary" onclick="saveFacebookGroup()">הוסף קבוצה</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yad2 URL Modal -->
+<div class="modal fade" id="yad2UrlModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">הוסף כתובת חיפוש יד2</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="yad2UrlForm">
+                    <div class="mb-3">
+                        <label for="searchUrl" class="form-label">כתובת חיפוש *</label>
+                        <input type="url" class="form-control" id="searchUrl" required
+                               placeholder="https://www.yad2.co.il/realestate/rent?...">
+                        <div class="form-text">
+                            צור חיפוש באתר יד2, העתק את הכתובת והדבק כאן
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="searchName" class="form-label">שם החיפוש</label>
+                        <input type="text" class="form-control" id="searchName"
+                               placeholder="לדוגמה: דירות 3 חדרים בתל אביב">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="searchActive" checked>
+                        <label class="form-check-label" for="searchActive">
+                            חיפוש פעיל
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
+                <button type="button" class="btn btn-primary" onclick="saveYad2Url()">הוסף חיפוש</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Status Modal -->
+<div class="modal fade" id="systemStatusModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">סטטוס מערכת מפורט</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="system-status-content">
+                    <!-- System status will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">סגור</button>
+                <button type="button" class="btn btn-primary" onclick="refreshSystemStatus()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    רענן
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

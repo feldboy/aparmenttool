@@ -1,0 +1,258 @@
+<div class="page-header">
+    <h2><i class="fas fa-bell"></i> Notifications</h2>
+    <p class="page-description">Manage notification settings and view notification history</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="total-notifications">0</h3>
+            <p>Total Sent</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="delivered-notifications">0</h3>
+            <p>Delivered</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="failed-notifications">0</h3>
+            <p>Failed</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content">
+            <h3 id="pending-notifications">0</h3>
+            <p>Pending</p>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h3>Notification Channels</h3>
+    </div>
+
+    <div class="channels-grid">
+        <div class="channel-card">
+            <div class="channel-header">
+                <i class="fas fa-paper-plane"></i>
+                <h4>Telegram</h4>
+                <div class="channel-status" id="telegram-status">
+                    <span class="status-indicator status-active"></span>
+                    Active
+                </div>
+            </div>
+            <div class="channel-settings">
+                <div class="setting-item">
+                    <label>Enable Telegram Notifications</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="telegram-enabled" checked>
+                        <label for="telegram-enabled"></label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>Notification Types</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="telegram-new-properties" checked>
+                            <span>New Properties</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="telegram-price-changes" checked>
+                            <span>Price Changes</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="telegram-system-alerts">
+                            <span>System Alerts</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="channel-card">
+            <div class="channel-header">
+                <i class="fas fa-envelope"></i>
+                <h4>Email</h4>
+                <div class="channel-status" id="email-status">
+                    <span class="status-indicator status-inactive"></span>
+                    Inactive
+                </div>
+            </div>
+            <div class="channel-settings">
+                <div class="setting-item">
+                    <label>Enable Email Notifications</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="email-enabled">
+                        <label for="email-enabled"></label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>Email Address</label>
+                    <input type="email" id="email-address" class="form-control" placeholder="Enter email address...">
+                </div>
+                <div class="setting-item">
+                    <label>Notification Types</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="email-new-properties">
+                            <span>New Properties</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="email-daily-summary">
+                            <span>Daily Summary</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="email-system-alerts">
+                            <span>System Alerts</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="channel-card">
+            <div class="channel-header">
+                <i class="fas fa-desktop"></i>
+                <h4>Web Push</h4>
+                <div class="channel-status" id="webpush-status">
+                    <span class="status-indicator status-inactive"></span>
+                    Inactive
+                </div>
+            </div>
+            <div class="channel-settings">
+                <div class="setting-item">
+                    <label>Enable Web Push Notifications</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="webpush-enabled">
+                        <label for="webpush-enabled"></label>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <button class="btn btn-secondary" onclick="notificationsManager.requestPermission()">
+                        <i class="fas fa-bell"></i> Request Permission
+                    </button>
+                </div>
+                <div class="setting-item">
+                    <label>Notification Types</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="webpush-new-properties">
+                            <span>New Properties</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="webpush-urgent-alerts">
+                            <span>Urgent Alerts</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-actions">
+        <button class="btn btn-primary" onclick="notificationsManager.saveSettings()">
+            <i class="fas fa-save"></i> Save Settings
+        </button>
+        <button class="btn btn-secondary" onclick="notificationsManager.testNotifications()">
+            <i class="fas fa-paper-plane"></i> Test Notifications
+        </button>
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h3>Notification Rules</h3>
+        <div class="section-actions">
+            <button class="btn btn-primary" onclick="notificationsManager.showAddRuleModal()">
+                <i class="fas fa-plus"></i> Add Rule
+            </button>
+        </div>
+    </div>
+
+    <div class="rules-container" id="rules-container">
+        <!-- Rules will be populated by JavaScript -->
+    </div>
+</div>
+
+<div class="content-section">
+    <div class="section-header">
+        <h3>Notification History</h3>
+        <div class="section-actions">
+            <button class="btn btn-outline-secondary" onclick="notificationsManager.refreshHistory()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+            <button class="btn btn-outline-secondary" onclick="notificationsManager.exportHistory()">
+                <i class="fas fa-download"></i> Export
+            </button>
+            <button class="btn btn-outline-danger" onclick="notificationsManager.clearHistory()">
+                <i class="fas fa-trash"></i> Clear History
+            </button>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="filter-group">
+            <input type="text" id="notification-search" placeholder="Search notifications..." class="form-control">
+        </div>
+        <div class="filter-group">
+            <select id="notification-type-filter" class="form-control">
+                <option value="">All Types</option>
+                <option value="new_property">New Property</option>
+                <option value="price_change">Price Change</option>
+                <option value="system_alert">System Alert</option>
+                <option value="daily_summary">Daily Summary</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <select id="notification-status-filter" class="form-control">
+                <option value="">All Status</option>
+                <option value="delivered">Delivered</option>
+                <option value="failed">Failed</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <input type="date" id="notification-date-filter" class="form-control">
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Channel</th>
+                    <th>Recipient</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="notifications-table-body">
+                <!-- Notifications will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="no-notifications-message" class="empty-state" style="display: none;">
+        <i class="fas fa-bell"></i>
+        <h3>No Notifications</h3>
+        <p>No notifications have been sent yet.</p>
+    </div>
+</div>

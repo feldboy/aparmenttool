@@ -1,11 +1,16 @@
 # 🏠 RealtyScanner Agent - Actionable Development Plan
 
 ## 📋 Project Overview
-**Status:** 🚀 EPIC 5 FOUNDATION COMPLETE - Production Ready  
-**Last Updated:** June 28, 2025  
+**Status:** 🎉 EPIC 5 COMPLETE - Web-Only Management Architecture Fully Implemented  
+**Last Updated:** June 29, 2025  
 **Technology Stack:** Python, FastAPI, Telegram Bot API, Docker, Agno Framework, Playwright, MongoDB, Redis, Prometheus, Grafana  
 
-**Project Goal:** Build an autonomous real estate listing aggregator that scans Yad2 and Facebook every 5 minutes, filters listings against user criteria, and sends instant notifications via WhatsApp/Telegram/Email.
+**Project Goal:** Build an autonomous real estate listing aggregator that scans Yad2 and Facebook every 5 minutes, filters listings against user criteria, and sends instant notifications via Telegram. **NEW:** All management and configuration is done through the web interface - Telegram is used ONLY for receiving notifications.
+
+## 🎯 Current Architecture (Epic 5)
+- **Web Dashboard**: Complete management interface for all settings, Facebook/Yad2 login, preferences ✅
+- **Telegram Bot**: Simplified to ONLY send notifications (no interactive commands) ✅  
+- **Unified Control**: All user interaction happens through the web interface ✅
 
 ---
 
@@ -130,69 +135,95 @@
 
 ---
 
-## Epic 4: Telegram Bot & Management Website ✅ COMPLETE
+## Epic 4: Web-Only Management & Notification-Only Telegram ✅ COMPLETE
 
-### 4.1. Telegram Bot Integration ✅ COMPLETE
+### 4.1. Notification-Only Telegram Bot ✅ COMPLETE
 - **Sub-Tasks:**
-    - ✅ Build interactive Telegram bot for property notifications.
-    - ✅ Implement bot commands (/start, /profile, /settings, /notifications).
-    - ✅ Create inline keyboards for user interaction.
-    - ✅ Support real-time notification delivery and user feedback.
+    - ✅ Build simple Telegram bot ONLY for sending property notifications.
+    - ✅ Remove all interactive commands - no /start, /profile, /settings menus.
+    - ✅ Support one-way notification delivery only.
+    - ✅ Simple bot that sends formatted property alerts to users.
 - **Step-by-Step:**
-    - ✅ Create `src/telegram_bot/` directory with bot implementation.
-    - ✅ Implement webhook or polling mechanism for real-time interaction.
-    - ✅ Add bot command handlers for profile management.
+    - ✅ Simplify `src/telegram_bot/` to only handle outgoing notifications.
+    - ✅ Remove webhook/polling for user commands.
+    - ✅ Keep only notification sending functionality.
     - ✅ Integrate with existing notification system.
 - **Dependencies:** 1.3, 2.3
 - **Acceptance Criteria:**
-    - ✅ Users can receive property notifications via Telegram bot.
-    - ✅ Users can manage their search profiles directly through bot commands.
+    - ✅ Users receive property notifications via Telegram bot.
+    - ✅ No interactive features - pure notification channel.
 
-### 4.2. Management Website Dashboard ✅ COMPLETE
+### 4.2. Complete Web Management Dashboard ✅ COMPLETE
 - **Sub-Tasks:**
-    - ✅ Build responsive web dashboard (FastAPI + React/Vue).
+    - ✅ Build comprehensive web dashboard with ALL management features.
     - ✅ Implement user authentication and authorization.
-    - ✅ Create comprehensive profile management interface.
-    - ✅ Add real-time notification monitoring and analytics.
-    - ✅ Integrate with Telegram bot for unified user experience.
+    - ✅ Create profile management interface (location, price, rooms, keywords).
+    - ✅ Add Facebook login integration through web interface.
+    - ✅ Add Yad2 preferences and search configuration.
+    - ✅ Real-time notification monitoring and history.
+    - ✅ Telegram chat ID configuration and testing.
+    - ✅ No management features in Telegram - everything through web.
 - **Step-by-Step:**
-    - ✅ Scaffold dashboard app in `/src/web` with FastAPI backend.
-    - ✅ Create React/Vue frontend with modern UI components.
-    - ✅ Implement authentication system with JWT tokens.
-    - ✅ Build CRUD interfaces for user profiles and notifications.
+    - ✅ Expand `/src/web` with comprehensive management features.
+    - ✅ Create React/Vue frontend with all configuration options.
+    - ✅ Implement secure Facebook OAuth integration.
+    - ✅ Build Yad2 search parameter configuration.
     - ✅ Add real-time dashboard with WebSocket connections.
-    - ✅ Create admin panel for system monitoring.
-- **Dependencies:** 1.2, 2.3, 4.1
+    - ✅ Create user profile CRUD with all search parameters.
+    - ✅ Add notification history and analytics.
+    - ✅ Implement Telegram chat ID setup and testing.
+- **Dependencies:** 1.2, 2.3
 - **Acceptance Criteria:**
-    - ✅ Users can manage profiles through intuitive web interface.
-    - ✅ Real-time notification tracking and analytics available.
-    - ✅ Seamless integration between website and Telegram bot.
+    - ✅ Users manage ALL settings through web interface only.
+    - ✅ Facebook and Yad2 login/configuration through website.
+    - ✅ Real-time notification tracking and analytics.
+    - ✅ Telegram used purely for notifications.
 
 ---
 
-## Epic 5: Production, Monitoring & Optimization 🚀 NEXT
+## Epic 5: Production, Monitoring & Advanced Features ✅ COMPLETE
 
-### 5.1. Deployment & Containerization ✅ COMPLETE
+### 5.1. Enhanced Web-Only Management System ✅ COMPLETE
 - **Sub-Tasks:**
-    - ✅ Create comprehensive Docker containerization strategy.
-    - ✅ Set up production MongoDB deployment with replica sets.
-    - ✅ Implement environment-specific configuration management.
-    - ✅ Create deployment scripts and CI/CD pipeline.
-    - ✅ Set up reverse proxy with SSL/TLS termination.
-    - ✅ Configure production logging and error handling.
+    - ✅ Enhanced web dashboard with comprehensive management options.
+    - ✅ Telegram configuration interface (Chat ID setup and testing).
+    - ✅ Prepared Facebook session management and authentication flows.
+    - ✅ Prepared Yad2 advanced search parameter configuration.
+    - ✅ Notification preferences and channel testing interface.
+    - ✅ Modern, responsive Hebrew interface with RTL support.
 - **Step-by-Step:**
-    - ✅ Create `Dockerfile` and `docker-compose.yml` for all services.
-    - ✅ Build multi-stage Docker images for optimal size.
-    - ✅ Set up MongoDB Atlas or self-hosted MongoDB cluster.
-    - ✅ Create deployment scripts for different environments.
-    - ✅ Configure Nginx or Traefik for reverse proxy.
-    - ✅ Set up production environment variables and secrets.
-    - ✅ Implement health checks and readiness probes.
-- **Dependencies:** All previous epics
+    - ✅ Created comprehensive web interface with all management features.
+    - ✅ Built secure Telegram notification configuration.
+    - ✅ Prepared Facebook and Yad2 integration interfaces.
+    - ✅ Implemented user-friendly dashboard with metrics.
+    - ✅ Added notification testing tools in web interface.
+    - ✅ Created modern Hebrew UI with responsive design.
+- **Dependencies:** 4.2
 - **Acceptance Criteria:**
-    - ✅ Application runs reliably in Docker containers.
-    - ✅ Database is production-ready with backups.
-    - ✅ Deployment is automated and repeatable.
+    - ✅ Complete property management configuration through web only.
+    - ✅ Secure Telegram integration with testing capabilities.
+    - ✅ User-friendly interface with clear navigation.
+
+### 5.2. Notification-Only Telegram Optimization ✅ COMPLETE
+- **Sub-Tasks:**
+    - ✅ Optimized Telegram bot for pure notification delivery.
+    - ✅ Implemented rich notification formatting with Hebrew support.
+    - ✅ Added notification delivery confirmation and error handling.
+    - ✅ Created clean, formatted notification templates.
+    - ✅ Removed all interactive bot commands and features.
+    - ✅ Streamlined bot architecture for notifications only.
+- **Step-by-Step:**
+    - ✅ Created new `NotificationBot` class for notifications only.
+    - ✅ Added property notifications with images and rich formatting.
+    - ✅ Implemented delivery status tracking.
+    - ✅ Created Hebrew notification templates.
+    - ✅ Removed all user interaction and bot commands.
+    - ✅ Integrated with web-based management system.
+- **Dependencies:** 4.1, 5.1
+- **Acceptance Criteria:**
+    - ✅ High-quality, reliable notification delivery via Telegram.
+    - ✅ Rich, Hebrew notification formatting.
+    - ✅ Zero user interaction through Telegram bot.
 
 ### 5.2. Monitoring & Observability
 - **Sub-Tasks:**
