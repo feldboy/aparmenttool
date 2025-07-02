@@ -25,6 +25,7 @@ pre-commit = "^4.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
+pytest-asyncio = "^0.21.0"
 black = "^24.10.0"
 flake8 = "^7.1.1"
 mypy = "^1.13.0"
@@ -47,3 +48,7 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p pytest_asyncio"
+norecursedirs = ["agno"]

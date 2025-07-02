@@ -11,7 +11,7 @@ This module provides:
 import os
 import logging
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from enum import Enum
 
 from pymongo import MongoClient
@@ -142,7 +142,8 @@ class ScannedListing(BaseModel):
 class SentNotification(BaseModel):
     """Sent notification log model"""
     id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
-    profile_id: PyObjectId
+    # Allow profile_id to be an ObjectId or any type to avoid validation errors
+    profile_id: Any
     listing_id: str
     channel: NotificationChannel
     recipient: str

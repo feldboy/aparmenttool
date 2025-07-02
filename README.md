@@ -12,6 +12,31 @@ An autonomous real estate listing aggregator that scans Yad2 and Facebook every 
 - **Real-time Synchronization**: Cross-platform data sync and live updates
 - **Built with Agno**: Leverages the powerful Agno framework for multi-agent systems
 
+## 📁 Project Structure
+
+```
+aparmenttool/
+├── config/            # Configuration files and environment variables
+├── deployment/        # Docker and deployment configuration files
+├── docs/             # Documentation and guides
+├── frontend/         # Web frontend assets
+├── logs/             # Application logs
+├── scripts/          # Utility and automation scripts
+├── src/              # Source code
+│   ├── analysis/     # Content analysis modules
+│   ├── notifications/# Notification system
+│   ├── scrapers/     # Data scraping modules
+│   ├── search/       # Search functionality
+│   ├── telegram/     # Telegram integration
+│   ├── telegram_bot/ # Telegram bot implementation
+│   └── web/          # Web server and dashboard
+└── tests/            # Test suites
+    ├── epic_tests/   # Tests for project epics
+    ├── integration/  # Integration tests
+    ├── system/       # System tests
+    └── unit/         # Unit tests
+```
+
 ## 📋 Project Status
 
 **Status**: ✅ EPIC 4 COMPLETE - Multi-platform Telegram Bot & Web Dashboard  
@@ -122,46 +147,6 @@ python scripts/test_epic2_complete.py
 2. **Login**: Use demo credentials (admin/admin)
 3. **Manage profiles**: Create, edit, and monitor search profiles
 4. **View analytics**: Track notifications and system performance
-
-## 🏗️ Project Structure
-
-```
-aparmenttool/
-├── src/                    # Main source code
-│   ├── telegram_bot/      # Interactive Telegram bot
-│   │   ├── bot.py         # Bot application
-│   │   ├── handlers.py    # Command and message handlers
-│   │   ├── utils.py       # Utility functions
-│   │   └── run_bot.py     # Bot runner script
-│   ├── web/               # Web dashboard
-│   │   ├── app.py         # FastAPI application
-│   │   ├── api.py         # API endpoints
-│   │   ├── auth.py        # Authentication
-│   │   ├── websocket.py   # Real-time updates
-│   │   ├── templates/     # HTML templates
-│   │   └── run_server.py  # Server runner script
-│   ├── scrapers/          # Web scrapers (Yad2, Facebook)
-│   ├── analysis/          # Content analysis and filtering
-│   ├── notifications/     # Multi-channel notifications
-│   ├── db.py             # Database connection and models
-│   └── main.py           # Main application entry point
-├── tests/                 # Test files
-├── scripts/              # Test and utility scripts
-├── docs/                 # Documentation
-│   ├── Todo.md           # Development roadmap
-│   └── Epic4_Implementation_Guide.md  # Epic 4 guide
-└── agno/                 # Agno framework (git submodule)
-```
-
-The project follows a detailed roadmap outlined in `docs/Todo.md`:
-
-- ✅ **Epic 1.1**: Project Structure & Environment Setup
-- 🏗️ **Epic 1.2**: MongoDB Database Schema & Connection
-- 📋 **Epic 1.3**: Notification System Foundation
-- 📋 **Epic 2**: Yad2 Integration & Filtering
-- 📋 **Epic 3**: Facebook Integration
-- 📋 **Epic 4**: User Management & Dashboard
-- 📋 **Epic 5**: Production, Monitoring & Optimization
 
 ## 🔧 Configuration
 

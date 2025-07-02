@@ -13,7 +13,7 @@ async function apiCall(url, options = {}) {
     return response.json();
 }
 
-async function loadFacebookStatus() {
+async function loadFacebookStatus() {git remote -v
     try {
         // ...existing code...
         await apiCall('/api/facebook/status');
