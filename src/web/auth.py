@@ -6,8 +6,15 @@ import os
 import logging
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
+# Load environment variables
+load_dotenv()
+
+# Allow skipping auth in development via env var SKIP_AUTH=true
+SKIP_AUTH = os.getenv("SKIP_AUTH", "false").lower() == "true"
 
 try:
     from fastapi import APIRouter, Depends, HTTPException, Request, Form
@@ -139,6 +146,9 @@ def get_current_user_from_token(token: str) -> Optional[Dict[str, Any]]:
 def require_auth(request: Request) -> Dict[str, Any]:
     """Dependency to require authentication"""
     user = request.session.get("user")
+    if SKIP_AUTH:
+        # Skip auth in development when SKIP_AUTH=true
+        return {"username": "dev", "role": "admin", "id": "user_1"}
     if not user:
         raise HTTPException(status_code=401, detail="Authentication required")
     return user

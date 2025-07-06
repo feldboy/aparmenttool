@@ -7,6 +7,7 @@ This module provides:
 3. Numeric filtering (price, rooms)
 4. Duplicate detection hashing
 5. Match scoring and ranking
+6. AI-powered enhanced analysis
 """
 
 import re
@@ -17,6 +18,18 @@ from dataclasses import dataclass
 from enum import Enum
 
 from scrapers.base import ScrapedListing
+
+logger = logging.getLogger(__name__)
+
+# AI Agents integration
+try:
+    from ai_agents import AIAgentManager
+    from ai_agents.models import AnalysisRequest, AIProvider
+    AI_AGENTS_AVAILABLE = True
+    logger.info("AI Agents integration enabled")
+except ImportError:
+    AI_AGENTS_AVAILABLE = False
+    logger.warning("AI Agents not available - falling back to rule-based analysis")
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +66,16 @@ class ContentAnalyzer:
     def __init__(self):
         """Initialize the content analyzer"""
         self.logger = logging.getLogger(f"{__name__}.ContentAnalyzer")
+        
+        # Initialize AI Agent Manager
+        if AI_AGENTS_AVAILABLE:
+            self.ai_manager = AIAgentManager()
+            self.use_ai_analysis = True
+            self.logger.info("AI-powered content analysis enabled")
+        else:
+            self.ai_manager = None
+            self.use_ai_analysis = False
+            self.logger.warning("AI analysis not available - using rule-based analysis only")
         
         # Hebrew/English normalization mappings
         self.text_normalizations = {
@@ -467,3 +490,191 @@ class ContentAnalyzer:
         except Exception as e:
             logger.error("Enhanced analysis failed, using basic result: %s", str(e))
             return basic_result
+
+    async def analyze_with_ai_agent(self, listing: ScrapedListing, profile: Dict[str, Any]) -> MatchResult:
+        """
+        Analyze listing using AI agent for advanced insights
+        
+        Args:
+            listing: Property listing to analyze
+            profile: User search profile
+            
+        Returns:
+            MatchResult with AI-powered analysis details
+        """
+        if not AI_AGENTS_AVAILABLE:
+            logger.warning("AI Agents not available - skipping AI analysis")
+            return self.analyze_listing(listing, profile)  # Fallback to standard analysis
+        
+        try:
+            # Prepare AI analysis request
+            request = AnalysisRequest(
+                listing_id=listing.listing_id,
+                title=listing.title,
+                description=listing.description,
+                location=listing.location,
+                price=listing.price,
+                rooms=listing.rooms,
+                url=listing.url,
+                profile_criteria=profile,
+                user_id="system",  # System-generated ID for internal requests
+                agent_type=AIProvider.GPT_4,  # Use GPT-4 for analysis
+                context="Analyze the property listing and provide match confidence and reasons."
+            )
+            
+            # Send request to AI agent
+            agent_response = await AIAgentManager.run_agent(request)
+            
+            # Parse AI response
+            ai_confidence = MatchConfidence.LOW
+            if agent_response and agent_response.get('confidence'):
+                ai_confidence = MatchConfidence(agent_response['confidence'].lower())
+            
+            ai_reasons = agent_response.get('reasons', [])
+            ai_score = agent_response.get('score', 0.0)
+            
+            return MatchResult(
+                is_match=ai_score >= 0.5,
+                confidence=ai_confidence,
+                score=ai_score,
+                reasons=ai_reasons,
+                location_matches=[],  # AI analysis may not provide detailed matches
+                price_match=True,     # Assume price match for AI analysis
+                rooms_match=True,     # Assume rooms match for AI analysis
+                keyword_matches=[]     # AI analysis may not provide keyword matches
+            )
+        
+        except Exception as e:
+            logger.error("AI analysis failed: %s", str(e))
+            return self.analyze_listing(listing, profile)  # Fallback to standard analysis
+    
+    async def analyze_listing_with_ai(self, listing: ScrapedListing, profile_criteria: Dict[str, Any]) -> MatchResult:
+        """
+        Analyze a listing with AI-powered analysis
+        
+        Args:
+            listing: Scraped listing to analyze
+            profile_criteria: User profile search criteria
+            
+        Returns:
+            MatchResult with enhanced AI analysis
+        """
+        if not self.use_ai_analysis:
+            return self.analyze_listing(listing, profile_criteria)
+        
+        try:
+            # Create analysis request
+            request = AnalysisRequest(
+                property_id=listing.id,
+                raw_text=f"{listing.title}\n{listing.description}\n{listing.location}",
+                source_url=listing.url,
+                source_platform=listing.source.value,
+                priority=1
+            )
+            
+            # Run AI analysis with multiple providers
+            analysis = await self.ai_manager.analyze_property_multi(request)
+            
+            # Combine AI analysis with rule-based analysis
+            rule_based_result = self.analyze_listing(listing, profile_criteria)
+            
+            # Create enhanced match result
+            return self._combine_ai_and_rule_results(analysis, rule_based_result, profile_criteria)
+            
+        except Exception as e:
+            self.logger.error(f"AI analysis failed, falling back to rule-based: {e}")
+            return self.analyze_listing(listing, profile_criteria)
+    
+    def _combine_ai_and_rule_results(self, ai_analysis, rule_result: MatchResult, profile_criteria: Dict[str, Any]) -> MatchResult:
+        """Combine AI analysis with rule-based results"""
+        try:
+            # Start with rule-based score
+            combined_score = rule_result.score
+            reasons = rule_result.reasons.copy()
+            
+            # Add AI insights
+            if ai_analysis.consensus_score and ai_analysis.consensus_score > 0.7:
+                combined_score += 20.0  # Bonus for high AI confidence
+                reasons.append(f"AI analysis confidence: {ai_analysis.consensus_score:.2f}")
+            
+            # Check AI-extracted location against criteria
+            if ai_analysis.location or ai_analysis.city:
+                ai_location = f"{ai_analysis.location or ''} {ai_analysis.city or ''}".strip()
+                if self._location_matches_criteria(ai_location, profile_criteria.get('location_criteria', {})):
+                    combined_score += 15.0
+                    reasons.append(f"AI-extracted location match: {ai_location}")
+            
+            # Check AI-extracted price against criteria
+            if ai_analysis.price:
+                price_criteria = profile_criteria.get('price', {})
+                if self._price_in_range(ai_analysis.price, price_criteria):
+                    combined_score += 10.0
+                    reasons.append(f"AI-extracted price match: {ai_analysis.price}")
+            
+            # Check AI-extracted rooms against criteria
+            if ai_analysis.rooms:
+                rooms_criteria = profile_criteria.get('rooms', {})
+                if self._rooms_in_range(ai_analysis.rooms, rooms_criteria):
+                    combined_score += 10.0
+                    reasons.append(f"AI-extracted rooms match: {ai_analysis.rooms}")
+            
+            # Add AI features and amenities
+            ai_features = (ai_analysis.features or []) + (ai_analysis.amenities or [])
+            if ai_features:
+                reasons.append(f"AI-detected features: {', '.join(ai_features[:3])}")
+            
+            # Determine final match confidence
+            if combined_score >= 80:
+                confidence = MatchConfidence.HIGH
+            elif combined_score >= 60:
+                confidence = MatchConfidence.MEDIUM
+            elif combined_score >= 40:
+                confidence = MatchConfidence.LOW
+            else:
+                confidence = MatchConfidence.NO_MATCH
+            
+            return MatchResult(
+                is_match=combined_score >= 40,
+                confidence=confidence,
+                score=min(combined_score, 100.0),
+                reasons=reasons,
+                location_matches=rule_result.location_matches,
+                price_match=rule_result.price_match or bool(ai_analysis.price),
+                rooms_match=rule_result.rooms_match or bool(ai_analysis.rooms),
+                keyword_matches=rule_result.keyword_matches
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error combining AI and rule results: {e}")
+            return rule_result
+    
+    def _location_matches_criteria(self, location: str, criteria: Dict[str, Any]) -> bool:
+        """Check if AI-extracted location matches criteria"""
+        if not location or not criteria:
+            return False
+        
+        location_lower = location.lower()
+        for criterion in criteria.get('areas', []):
+            if criterion.lower() in location_lower:
+                return True
+        return False
+    
+    def _price_in_range(self, price: float, criteria: Dict[str, Any]) -> bool:
+        """Check if AI-extracted price is in range"""
+        if not price or not criteria:
+            return False
+        
+        min_price = criteria.get('min_price', 0)
+        max_price = criteria.get('max_price', float('inf'))
+        
+        return min_price <= price <= max_price
+    
+    def _rooms_in_range(self, rooms: int, criteria: Dict[str, Any]) -> bool:
+        """Check if AI-extracted rooms count is in range"""
+        if not rooms or not criteria:
+            return False
+        
+        min_rooms = criteria.get('min_rooms', 0)
+        max_rooms = criteria.get('max_rooms', 10)
+        
+        return min_rooms <= rooms <= max_rooms

@@ -297,6 +297,20 @@ class InMemoryDataStore:
         self.system_settings[user_id].update(settings)
         self.system_settings[user_id]['updated_at'] = datetime.now().isoformat()
         return self.system_settings[user_id]
+    
+    # User settings methods  
+    def get_user_settings(self, user_id: str) -> Dict[str, Any]:
+        """Get user-specific settings"""
+        return self.system_settings.get(user_id, {})
+    
+    def update_user_settings(self, user_id: str, settings: Dict[str, Any]) -> Dict[str, Any]:
+        """Update user-specific settings"""
+        if user_id not in self.system_settings:
+            self.system_settings[user_id] = {}
+        
+        self.system_settings[user_id].update(settings)
+        self.system_settings[user_id]['updated_at'] = datetime.now().isoformat()
+        return self.system_settings[user_id]
 
 # Global data store instance
 data_store = InMemoryDataStore()

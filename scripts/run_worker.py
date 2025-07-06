@@ -78,9 +78,15 @@ class RealtyWorker:
                 from analysis.content import ContentAnalyzer
                 self.content_analyzer = ContentAnalyzer()
                 logger.info("Content analyzer initialized")
+                
+                # Enable AI analysis if available
+                if hasattr(self.content_analyzer, 'use_ai_analysis') and self.content_analyzer.use_ai_analysis:
+                    logger.info("AI-powered content analysis enabled")
+                else:
+                    logger.info("Using rule-based content analysis")
+                    
             except ImportError as e:
                 logger.warning(f"Content analyzer not available: {e}")
-                self.content_analyzer = None
                 self.content_analyzer = None
                 
         except Exception as e:

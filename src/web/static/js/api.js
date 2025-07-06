@@ -1,18 +1,82 @@
-// API Utility Functions
+/**
+ * Custom API Error class
+ */
+class APIError extends Error {
+    constructor(status, message, endpoint) {
+        super(message);
+        this.name = 'APIError';
+        this.status = status;
+        this.endpoint = endpoint;
+    }
+}
+
+/**
+ * Enhanced API Client with proper error handling and retry logic
+ */
 class APIClient {
     constructor() {
-        this.baseURL = '/api/v1';
+        this.baseURL = '/api';
         this.defaultHeaders = {
             'Content-Type': 'application/json',
         };
+        this.retryAttempts = 3;
+        this.retryDelay = 1000;
+        this.requestTimeout = 30000;
     }
 
     async call(endpoint, method = 'GET', data = null, options = {}) {
+        const startTime = Date.now();
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
+            try {
+                const result = await this.makeRequest(endpoint, method, data, options);
+                
+                // Log successful request
+                console.log(`API Success [${method} ${endpoint}]: ${Date.now() - startTime}ms`);
+                return result;
+                
+            } catch (error) {
+                lastError = error;
+                console.warn(`API Attempt ${attempt} failed [${method} ${endpoint}]:`, error.message);
+                
+                // Don't retry certain errors
+                if (error.status === 401 || error.status === 403 || error.status === 404) {
+                    break;
+                }
+                
+                // Don't retry on last attempt
+                if (attempt === this.retryAttempts) {
+                    break;
+                }
+                
+                // Wait before retry
+                await this.sleep(this.retryDelay * attempt);
+            }
+        }
+
+        // All attempts failed, try mock data or throw error
+        console.error(`API Failed [${method} ${endpoint}] after ${this.retryAttempts} attempts:`, lastError);
+        
         try {
-            const url = `${this.baseURL}${endpoint}`;
+            return this.getMockData(endpoint, method, data);
+        } catch (mockError) {
+            throw lastError || new Error('Request failed');
+        }
+    }
+
+    async makeRequest(endpoint, method, data, options) {
+        const url = `${this.baseURL}${endpoint}`;
+        const controller = new AbortController();
+        
+        // Set timeout
+        const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
+        
+        try {
             const config = {
                 method,
                 headers: { ...this.defaultHeaders, ...options.headers },
+                signal: controller.signal,
                 ...options
             };
 
@@ -22,51 +86,89 @@ class APIClient {
 
             const response = await fetch(url, config);
             
+            clearTimeout(timeoutId);
+            
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                throw new APIError(response.status, response.statusText, endpoint);
             }
 
-            return await response.json();
+            // Handle different response types
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            } else {
+                return await response.text();
+            }
             
         } catch (error) {
-            console.error(`API Error [${method} ${endpoint}]:`, error);
+            clearTimeout(timeoutId);
             
-            // Return mock data for development
-            if (endpoint.includes('/profiles') && method === 'GET') {
-                return this.getMockProfiles();
+            if (error.name === 'AbortError') {
+                throw new APIError(408, 'Request Timeout', endpoint);
             }
             
-            if (endpoint.includes('/notifications')) {
-                return this.getMockNotifications();
+            if (error instanceof APIError) {
+                throw error;
             }
             
-            if (endpoint.includes('/system/status')) {
-                return this.getMockSystemStatus();
-            }
-            
-            if (endpoint.includes('/analytics/summary')) {
-                return this.getMockAnalytics();
-            }
-            
-            if (endpoint.includes('/facebook/status')) {
-                return this.getMockFacebookStatus();
-            }
-            
-            if (endpoint.includes('/telegram/status')) {
-                return this.getMockTelegramStatus();
-            }
-            
-            if (endpoint.includes('/yad2/config')) {
-                return this.getMockYad2Config();
-            }
-
-            // Default success response for write operations
-            if (['POST', 'PUT', 'DELETE'].includes(method)) {
-                return { success: true, message: 'הפעולה בוצעה בהצלחה' };
-            }
-            
-            throw error;
+            throw new APIError(0, error.message, endpoint);
         }
+    }
+
+    getMockData(endpoint, method, data) {
+        console.log(`Using mock data for [${method} ${endpoint}]`);
+        
+        // Return mock data based on endpoint
+        if (endpoint.includes('/profiles') && method === 'GET') {
+            return this.getMockProfiles();
+        }
+        
+        if (endpoint.includes('/notifications')) {
+            return this.getMockNotifications();
+        }
+        
+        if (endpoint.includes('/system/status')) {
+            return this.getMockSystemStatus();
+        }
+        
+        if (endpoint.includes('/analytics/summary')) {
+            return this.getMockAnalytics();
+        }
+        
+        if (endpoint.includes('/analytics/recent-activity')) {
+            return this.getMockRecentActivity();
+        }
+        
+        if (endpoint.includes('/facebook/status')) {
+            return this.getMockFacebookStatus();
+        }
+        
+        if (endpoint.includes('/telegram/config') || endpoint.includes('/telegram/status')) {
+            return this.getMockTelegramConfig();
+        }
+        
+        if (endpoint.includes('/yad2/config')) {
+            return this.getMockYad2Config();
+        }
+        
+        if (endpoint.includes('/settings')) {
+            return this.getMockSettings();
+        }
+
+        // Default success response for write operations
+        if (['POST', 'PUT', 'DELETE'].includes(method)) {
+            return { 
+                success: true, 
+                message: 'הפעולה בוצעה בהצלחה',
+                data: data
+            };
+        }
+        
+        throw new APIError(404, 'No mock data available', endpoint);
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     // Mock data methods for development
@@ -199,6 +301,49 @@ class APIClient {
                 last_scan: '2025-06-29T15:25:00Z',
                 active: true
             }
+        };
+    }
+
+    getMockRecentActivity() {
+        return {
+            activity: [
+                {
+                    id: 'activity_1',
+                    title: 'דירה חדשה נמצאה',
+                    description: 'דירת 3 חדרים בפלורנטין תואמת לפרופיל "דירה בתל אביב"',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+                },
+                {
+                    id: 'activity_2',
+                    title: 'פרופיל עודכן',
+                    description: 'פרופיל "בית בירושלים" הופעל מחדש',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
+                },
+                {
+                    id: 'activity_3',
+                    title: 'התראה נשלחה',
+                    description: 'התראה נשלחה לטלגרם על דירה בגבעת שאול',
+                    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString()
+                }
+            ]
+        };
+    }
+
+    getMockTelegramConfig() {
+        return {
+            chat_id: '123456789',
+            is_connected: true,
+            last_message_sent: new Date().toISOString()
+        };
+    }
+
+    getMockSettings() {
+        return {
+            notification_frequency: 'immediate',
+            email_notifications: false,
+            max_notifications_per_day: 10,
+            quiet_hours_start: '22:00',
+            quiet_hours_end: '08:00'
         };
     }
 

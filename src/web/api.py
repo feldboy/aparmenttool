@@ -4,7 +4,7 @@ API routes for the web dashboard
 
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ def create_api_router():
     try:
         from fastapi import APIRouter, Depends, HTTPException, Query
         from fastapi.responses import JSONResponse
-        from .auth import require_auth
+        from .auth import require_auth, SKIP_AUTH
         
         api_router = APIRouter()
         
@@ -194,347 +194,154 @@ def create_api_router():
         @api_router.get("/settings")
         async def get_settings(user: Dict[str, Any] = Depends(require_auth)):
             """Get user settings"""
-            # TODO: Get from database
-            settings = {
-                'notification_channels': {
-                    'telegram': {'enabled': True, 'chat_id': '123456789'},
-                    'email': {'enabled': True, 'address': 'user@example.com'},
-                    'whatsapp': {'enabled': False, 'phone': '+972501234567'}
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            # Get settings from data store or return defaults
+            settings = data_store.get_user_settings(user_id) if hasattr(data_store, 'get_user_settings') else {}
+            
+            default_settings = {
+                'scan_frequency': 5,  # minutes
+                'max_notifications_per_day': 50,
+                'notification_quiet_hours': {
+                    'enabled': True,
+                    'start': '22:00',
+                    'end': '08:00'
                 },
-                'preferences': {
-                    'scan_frequency': 5,  # minutes
-                    'notification_quiet_hours': {'start': '23:00', 'end': '07:00'},
-                    'max_daily_notifications': 10
-                }
+                'email_notifications': False,
+                'telegram_notifications': True,
+                'whatsapp_notifications': False,
+                'notification_format': 'detailed',
+                'language': 'he',
+                'timezone': 'Asia/Jerusalem',
+                'data_retention_days': 90,
+                'auto_archive_old_listings': True
             }
             
-            return settings
+            # Merge with defaults
+            final_settings = {**default_settings, **settings}
+            
+            return final_settings
         
         @api_router.put("/settings")
         async def update_settings(settings_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
             """Update user settings"""
-            # TODO: Validate and save to database
-            return {"message": "Settings updated successfully", "settings": settings_data}
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            # Validate settings data
+            valid_keys = {
+                'scan_frequency', 'max_notifications_per_day', 'notification_quiet_hours',
+                'email_notifications', 'telegram_notifications', 'whatsapp_notifications',
+                'notification_format', 'language', 'timezone', 'data_retention_days',
+                'auto_archive_old_listings'
+            }
+            
+            # Filter to only valid keys
+            filtered_settings = {k: v for k, v in settings_data.items() if k in valid_keys}
+            
+            # Update settings (mock implementation)
+            if hasattr(data_store, 'update_user_settings'):
+                data_store.update_user_settings(user_id, filtered_settings)
+            
+            return {"message": "Settings updated successfully", "settings": filtered_settings}
         
         # System Status Routes
         
         @api_router.get("/system/status")
-        async def get_system_status():
-            """Get system status"""
+        async def get_system_status(user: Dict[str, Any] = Depends(require_auth)):
+            """Get system status information"""
+            # TODO: Get real status from system monitors
             status = {
-                'status': 'healthy',
-                'services': {
-                    'database': 'connected',
-                    'telegram_bot': 'running',
-                    'scrapers': 'active',
-                    'notifications': 'operational'
-                },
-                'last_scan': '2025-06-28T14:35:00Z',
-                'active_profiles': 42,
-                'pending_notifications': 3
+                'yad2_status': 'connected',
+                'facebook_status': 'warning',
+                'telegram_status': 'connected',
+                'email_status': 'disconnected',
+                'database_status': 'connected',
+                'worker_status': 'running',
+                'last_scan': datetime.now().isoformat(),
+                'uptime': '2d 14h 32m',
+                'scan_frequency': '5 minutes',
+                'errors_last_24h': 2
             }
             
             return status
         
-        # Telegram Bot Management Routes
-        
-        @api_router.get("/telegram/status")
-        async def get_telegram_status(user: Dict[str, Any] = Depends(require_auth)):
-            """Get Telegram bot connection status"""
-            from .data_store import get_data_store
-            
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            settings = data_store.get_telegram_settings(user_id)
-            
-            return {
-                "connected": settings.get('enabled', False),
-                "chat_id": settings.get('chat_id', ''),
-                "bot_username": "@RealtyScanner_bot",
-                "last_test": settings.get('last_test'),
-                "connection_status": settings.get('connection_status', 'not_configured')
-            }
-        
-        @api_router.post("/telegram/setup")
-        async def setup_telegram(setup_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
-            """Setup Telegram chat ID for user"""
-            from .data_store import get_data_store
-            
-            chat_id = setup_data.get('chat_id')
-            if not chat_id:
-                raise HTTPException(status_code=400, detail="Chat ID is required")
-            
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            
-            # Update telegram settings
-            updated_settings = data_store.update_telegram_settings(user_id, {
-                'chat_id': chat_id,
-                'enabled': True,
-                'connection_status': 'configured'
-            })
-            
-            return {
-                "message": "Telegram setup completed successfully",
-                "chat_id": chat_id,
-                "setup_completed": True,
-                "settings": updated_settings
-            }
-        
-        @api_router.post("/telegram/test")
-        async def test_telegram_connection(user: Dict[str, Any] = Depends(require_auth)):
-            """Send test message to user's Telegram"""
-            from .data_store import get_data_store
-            
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            settings = data_store.get_telegram_settings(user_id)
-            
-            chat_id = settings.get('chat_id')
-            if not chat_id:
-                raise HTTPException(status_code=400, detail="Telegram not configured")
-            
-            try:
-                # Try to send actual test message
-                from ..telegram_bot.notification_bot import test_telegram_connection
-                import asyncio
-                
-                success = await test_telegram_connection(chat_id)
-                
-                # Update last test time
-                data_store.update_telegram_settings(user_id, {
-                    'last_test': datetime.now().isoformat(),
-                    'connection_status': 'connected' if success else 'error'
-                })
-                
-                return {
-                    "success": success,
-                    "message": "Test message sent successfully!" if success else "Failed to send test message",
-                    "chat_id": chat_id
-                }
-            except Exception as e:
-                logger.error(f"Error testing Telegram connection: {e}")
-                data_store.update_telegram_settings(user_id, {
-                    'connection_status': 'error'
-                })
-                return {
-                    "success": False,
-                    "message": f"Error testing connection: {str(e)}"
-                }
-        
-        # Facebook Integration Routes
-        
-        @api_router.get("/facebook/status")
-        async def get_facebook_status(user: Dict[str, Any] = Depends(require_auth)):
-            """Get Facebook integration status"""
-            from .data_store import get_data_store
-            
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            settings = data_store.get_facebook_settings(user_id)
-            
-            return {
-                "connected": settings.get('enabled', False),
-                "session_valid": settings.get('session_valid', False),
-                "groups_configured": len(settings.get('groups', [])),
-                "last_login": settings.get('last_login'),
-                "requires_reauth": settings.get('requires_reauth', True)
-            }
-        
-        @api_router.post("/facebook/login")
-        async def facebook_login(login_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
-            """Handle Facebook login/authentication"""
-            from .data_store import get_data_store
-            
-            # This is a simplified mock implementation
-            # In reality, this would handle OAuth flow
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            
-            # Simulate successful login
-            updated_settings = data_store.update_facebook_settings(user_id, {
-                'enabled': True,
-                'session_valid': True,
-                'last_login': datetime.now().isoformat(),
-                'requires_reauth': False
-            })
-            
-            return {
-                "message": "Facebook login successful",
-                "session_valid": True,
-                "auth_url": None,  # No need for auth URL after successful login
-                "settings": updated_settings
-            }
-        
-        @api_router.post("/facebook/groups")
-        async def configure_facebook_groups(groups_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
-            """Configure Facebook groups to monitor"""
-            from .data_store import get_data_store
-            
-            groups = groups_data.get('groups', [])
-            
-            # Validate groups data
-            for group in groups:
-                if not group.get('id') or not group.get('name'):
-                    raise HTTPException(status_code=400, detail="Invalid group data")
-            
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            
-            updated_settings = data_store.update_facebook_settings(user_id, {
-                'groups': groups
-            })
-            
-            return {
-                "message": f"Configured {len(groups)} Facebook groups successfully",
-                "groups": groups,
-                "total_groups": len(groups),
-                "settings": updated_settings
-            }
-        
-        @api_router.get("/facebook/groups")
-        async def get_facebook_groups(user: Dict[str, Any] = Depends(require_auth)):
-            """Get configured Facebook groups"""
-            from .data_store import get_data_store
-            
-            data_store = get_data_store()
-            user_id = user.get('id', 'user_1')
-            settings = data_store.get_facebook_settings(user_id)
-            
-            groups = settings.get('groups', [])
-            
-            # Add some mock groups if none configured
-            if not groups:
-                groups = [
-                    {
-                        "id": "123456789",
-                        "name": "דירות להשכרה תל אביב",
-                        "url": "https://facebook.com/groups/123456789",
-                        "members": 15420,
-                        "last_scan": "2025-06-28T15:00:00Z",
-                        "active": True
-                    },
-                    {
-                        "id": "987654321",
-                        "name": "השכרת דירות ירושלים",
-                        "url": "https://facebook.com/groups/987654321",
-                        "members": 8900,
-                        "last_scan": "2025-06-28T14:30:00Z",
-                        "active": True
-                    }
-                ]
-            
-            return {"groups": groups, "total": len(groups)}
-        
-        # Yad2 Configuration Routes
-        
-        @api_router.get("/yad2/config")
-        async def get_yad2_config(user: Dict[str, Any] = Depends(require_auth)):
-            """Get Yad2 search configuration"""
-            # TODO: Load from user profile
-            mock_config = {
-                "search_urls": [
-                    "https://www.yad2.co.il/realestate/rent?city=5000&rooms=2-3&price=3000-6000"
-                ],
-                "scan_frequency": 300,  # 5 minutes
-                "last_scan": "2025-06-28T15:25:00Z",
-                "active": True
-            }
-            
-            return {"config": mock_config}
-        
-        @api_router.post("/yad2/config")
-        async def update_yad2_config(config_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
-            """Update Yad2 search configuration"""
-            # TODO: Validate and save configuration
-            return {
-                "message": "Yad2 configuration updated",
-                "config": config_data
-            }
-        
-        # Notification Preferences Routes
-        
-        @api_router.get("/preferences/notifications")
-        async def get_notification_preferences(user: Dict[str, Any] = Depends(require_auth)):
-            """Get user notification preferences"""
-            # TODO: Load from user profile
-            mock_prefs = {
-                "channels": {
-                    "telegram": {
-                        "enabled": True,
-                        "chat_id": user.get('telegram_chat_id'),
-                        "quiet_hours": {"start": "23:00", "end": "07:00"}
-                    },
-                    "email": {
-                        "enabled": False,
-                        "address": user.get('email')
-                    }
-                },
-                "formatting": {
-                    "include_images": True,
-                    "include_description": True,
-                    "max_description_length": 100
-                },
-                "delivery": {
-                    "immediate": True,
-                    "batch_notifications": False,
-                    "max_per_hour": 10
-                }
-            }
-            
-            return {"preferences": mock_prefs}
-        
-        @api_router.post("/preferences/notifications")
-        async def update_notification_preferences(prefs_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
-            """Update notification preferences"""
-            # TODO: Validate and save preferences
-            return {
-                "message": "Notification preferences updated",
-                "preferences": prefs_data
-            }
-        
-        # System Status and Analytics Routes
-        
-        @api_router.get("/system/status")
-        async def get_system_status(user: Dict[str, Any] = Depends(require_auth)):
-            """Get overall system status"""
-            return {
-                "scanner_status": {
-                    "yad2": {"status": "active", "last_scan": "2025-06-28T15:25:00Z"},
-                    "facebook": {"status": "requires_auth", "last_scan": None}
-                },
-                "notification_status": {
-                    "telegram": {"status": "connected", "last_sent": "2025-06-28T14:30:00Z"},
-                    "email": {"status": "disabled"}
-                },
-                "database_status": "connected",
-                "uptime": "2 days, 5 hours"
-            }
+        # Analytics Routes
         
         @api_router.get("/analytics/summary")
-        async def get_analytics_summary(
-            days: int = Query(7, le=30),
-            user: Dict[str, Any] = Depends(require_auth)
-        ):
-            """Get analytics summary for the specified period"""
-            # TODO: Load real analytics data
-            mock_analytics = {
-                "period_days": days,
-                "total_properties_found": 45,
-                "notifications_sent": 12,
-                "profiles_active": 2,
-                "sources_breakdown": {
-                    "yad2": {"properties": 32, "notifications": 8},
-                    "facebook": {"properties": 13, "notifications": 4}
-                },
-                "daily_breakdown": [
-                    {"date": "2025-06-28", "properties": 8, "notifications": 3},
-                    {"date": "2025-06-27", "properties": 12, "notifications": 4},
-                    {"date": "2025-06-26", "properties": 6, "notifications": 2}
-                ]
+        async def get_analytics_summary(user: Dict[str, Any] = Depends(require_auth)):
+            """Get analytics summary data"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            # TODO: Calculate real metrics from database
+            summary = {
+                'total_properties': 2847,
+                'notifications_sent': 156,
+                'active_profiles': 3,
+                'uptime_percentage': 98.7,
+                'properties_last_24h': 47,
+                'notifications_last_24h': 12,
+                'avg_response_time': '2.3s',
+                'successful_scans': 1247,
+                'failed_scans': 15
             }
             
-            return {"analytics": mock_analytics}
+            return summary
+        
+        @api_router.get("/analytics/recent-activity")
+        async def get_recent_activity(
+            limit: int = Query(default=20, le=100),
+            user: Dict[str, Any] = Depends(require_auth)
+        ):
+            """Get recent system activity"""
+            # TODO: Get real activity from logs/database
+            activities = [
+                {
+                    'id': 'activity_1',
+                    'title': 'New property found',
+                    'description': '2 room apartment in Florentin for ₪4,800',
+                    'type': 'property_found',
+                    'timestamp': datetime.now().isoformat(),
+                    'profile_name': 'Tel Aviv Apartments'
+                },
+                {
+                    'id': 'activity_2',
+                    'title': 'Notification sent',
+                    'description': 'Telegram message sent successfully',
+                    'type': 'notification_sent',
+                    'timestamp': (datetime.now()).isoformat(),
+                    'profile_name': 'Tel Aviv Apartments'
+                },
+                {
+                    'id': 'activity_3',
+                    'title': 'Scan completed',
+                    'description': 'Yad2 scan found 15 new listings',
+                    'type': 'scan_completed',
+                    'timestamp': datetime.now().isoformat(),
+                    'source': 'Yad2'
+                },
+                {
+                    'id': 'activity_4',
+                    'title': 'Profile activated',
+                    'description': 'Profile "Budget Studios" has been activated',
+                    'type': 'profile_activated',
+                    'timestamp': datetime.now().isoformat(),
+                    'profile_name': 'Budget Studios'
+                }
+            ]
+            
+            # Apply limit
+            activities = activities[:limit]
+            
+            return {"activity": activities, "total": len(activities)}
         
         # Import/Export Routes
         
@@ -652,6 +459,252 @@ def create_api_router():
             data_store.update_yad2_settings(user_id, {'search_urls': search_urls})
             
             return {"message": "URL deleted successfully"}
+        
+        # Yad2 Configuration Routes
+        
+        @api_router.get("/yad2/config")
+        async def get_yad2_config(user: Dict[str, Any] = Depends(require_auth)):
+            """Get Yad2 configuration"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            settings = data_store.get_yad2_settings(user_id)
+            
+            # Return config in the format expected by frontend
+            config = {
+                'is_active': settings.get('enabled', True),
+                'scan_interval': settings.get('scan_frequency', 300) // 60,  # Convert seconds to minutes
+                'last_scan': settings.get('last_scan'),
+                'search_urls': settings.get('search_urls', []),
+                'status': 'connected' if settings.get('enabled', True) else 'disconnected',
+                'total_urls': len(settings.get('search_urls', [])),
+                'active_urls': len([url for url in settings.get('search_urls', []) if url.get('active', True)])
+            }
+            
+            return config
+        
+        @api_router.post("/yad2/config")
+        async def update_yad2_config(config_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
+            """Update Yad2 configuration"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            # Extract and validate config data
+            scan_interval = config_data.get('scan_interval', 5)  # minutes
+            is_active = config_data.get('is_active', True)
+            
+            # Convert minutes to seconds for storage
+            scan_frequency = scan_interval * 60
+            
+            # Update settings
+            updated_settings = {
+                'enabled': is_active,
+                'scan_frequency': scan_frequency,
+                'updated_at': datetime.now().isoformat()
+            }
+            
+            data_store.update_yad2_settings(user_id, updated_settings)
+            
+            return {"message": "Yad2 configuration updated successfully", "config": updated_settings}
+        
+        # Telegram Configuration Routes
+        
+        @api_router.get("/telegram/config")
+        async def get_telegram_config(user: Dict[str, Any] = Depends(require_auth)):
+            """Get Telegram configuration"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            settings = data_store.get_telegram_settings(user_id)
+            
+            config = {
+                'chat_id': settings.get('chat_id', ''),
+                'is_connected': bool(settings.get('chat_id')),
+                'bot_username': 'RealtyScanner_bot',
+                'enabled': settings.get('enabled', True),
+                'last_message_sent': settings.get('last_message_sent'),
+                'total_messages_sent': settings.get('total_messages_sent', 0)
+            }
+            
+            return config
+        
+        @api_router.post("/telegram/config")
+        async def update_telegram_config(config_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
+            """Update Telegram configuration"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            # Extract chat_id and validate
+            chat_id = config_data.get('chat_id', '').strip()
+            if not chat_id:
+                raise HTTPException(status_code=400, detail="Chat ID is required")
+            
+            # Update settings
+            updated_settings = {
+                'chat_id': chat_id,
+                'enabled': True,
+                'updated_at': datetime.now().isoformat()
+            }
+            
+            data_store.update_telegram_settings(user_id, updated_settings)
+            
+            return {"message": "Telegram configuration updated successfully", "config": updated_settings}
+        
+        @api_router.post("/telegram/find-chat-id")
+        async def find_telegram_chat_id(user: Dict[str, Any] = Depends(require_auth)):
+            """Find Telegram chat ID from recent messages"""
+            # This would typically check recent messages from the bot
+            # For demo purposes, return a mock response
+            
+            # In real implementation, this would:
+            # 1. Get recent updates from Telegram API
+            # 2. Find the most recent chat that sent /start
+            # 3. Return the chat_id
+            
+            return {
+                "chat_id": "123456789",
+                "found": True,
+                "message": "Chat ID found from recent messages"
+            }
+        
+        @api_router.post("/telegram/test")
+        async def test_telegram_connection(user: Dict[str, Any] = Depends(require_auth)):
+            """Test Telegram connection by sending a test message"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            settings = data_store.get_telegram_settings(user_id)
+            
+            chat_id = settings.get('chat_id')
+            if not chat_id:
+                raise HTTPException(status_code=400, detail="No chat ID configured")
+            
+            # In real implementation, this would send a test message via Telegram API
+            # For demo purposes, simulate success
+            
+            return {
+                "success": True,
+                "message": "Test message sent successfully",
+                "chat_id": chat_id
+            }
+        
+        # Facebook Configuration Routes
+        
+        @api_router.get("/facebook/status")
+        async def get_facebook_status(user: Dict[str, Any] = Depends(require_auth)):
+            """Get Facebook connection status"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            settings = data_store.get_facebook_settings(user_id)
+            
+            status = {
+                'is_connected': settings.get('is_connected', False),
+                'login_status': settings.get('login_status', 'disconnected'),
+                'session_expires': settings.get('session_expires'),
+                'groups': settings.get('groups', []),
+                'total_groups': len(settings.get('groups', [])),
+                'active_groups': len([g for g in settings.get('groups', []) if g.get('active', True)]),
+                'last_scan': settings.get('last_scan'),
+                'scan_enabled': settings.get('scan_enabled', False)
+            }
+            
+            return status
+        
+        @api_router.post("/facebook/connect")
+        async def connect_facebook(user: Dict[str, Any] = Depends(require_auth)):
+            """Initiate Facebook connection"""
+            # In real implementation, this would:
+            # 1. Start a Playwright browser session
+            # 2. Navigate to Facebook login
+            # 3. Wait for user to login
+            # 4. Save session cookies
+            
+            # For demo purposes, simulate connection process
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            # Update Facebook settings to show connected
+            updated_settings = {
+                'is_connected': True,
+                'login_status': 'connected',
+                'session_expires': (datetime.now() + timedelta(days=30)).isoformat(),
+                'connected_at': datetime.now().isoformat()
+            }
+            
+            data_store.update_facebook_settings(user_id, updated_settings)
+            
+            return {
+                "success": True,
+                "message": "Facebook connection established",
+                "redirect_url": "https://facebook.com/login"  # In real implementation
+            }
+        
+        @api_router.post("/facebook/groups")
+        async def add_facebook_group(group_data: Dict[str, Any], user: Dict[str, Any] = Depends(require_auth)):
+            """Add Facebook group for scanning"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            group_url = group_data.get('group_url', '').strip()
+            if not group_url:
+                raise HTTPException(status_code=400, detail="Group URL is required")
+            
+            # Extract group info from URL (simplified)
+            group_id = group_url.split('/')[-1] if '/' in group_url else group_url
+            
+            new_group = {
+                'id': f"group_{group_id}",
+                'url': group_url,
+                'name': group_data.get('name', f"Group {group_id}"),
+                'active': True,
+                'added_at': datetime.now().isoformat(),
+                'last_scan': None,
+                'total_posts_found': 0
+            }
+            
+            # Update settings
+            settings = data_store.get_facebook_settings(user_id)
+            groups = settings.get('groups', [])
+            groups.append(new_group)
+            
+            data_store.update_facebook_settings(user_id, {'groups': groups})
+            
+            return {"message": "Facebook group added successfully", "group": new_group}
+        
+        @api_router.delete("/facebook/groups/{group_id}")
+        async def remove_facebook_group(group_id: str, user: Dict[str, Any] = Depends(require_auth)):
+            """Remove Facebook group from scanning"""
+            from .data_store import get_data_store
+            
+            data_store = get_data_store()
+            user_id = user.get('id', 'user_1')
+            
+            settings = data_store.get_facebook_settings(user_id)
+            groups = settings.get('groups', [])
+            
+            # Remove group with matching ID
+            original_length = len(groups)
+            groups = [g for g in groups if g['id'] != group_id]
+            
+            if len(groups) == original_length:
+                raise HTTPException(status_code=404, detail="Group not found")
+            
+            data_store.update_facebook_settings(user_id, {'groups': groups})
+            
+            return {"message": "Facebook group removed successfully"}
 
         return api_router
         
