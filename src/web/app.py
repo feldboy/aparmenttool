@@ -89,44 +89,44 @@ def setup_routes(app: FastAPI):
     async def dashboard(request: Request):
         """Main dashboard page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     # Profile routes for SPA navigation
     @app.get("/profiles")
     async def profiles_page(request: Request):
         """Profiles page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     @app.get("/telegram")
     async def telegram_page(request: Request):
         """Telegram settings page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     @app.get("/facebook")
     async def facebook_page(request: Request):
         """Facebook settings page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     @app.get("/yad2")
     async def yad2_page(request: Request):
         """Yad2 settings page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     @app.get("/notifications")
     async def notifications_page(request: Request):
         """Notifications page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     @app.get("/settings")
     async def settings_page(request: Request):
         """Settings page"""
         templates = get_templates()
-        return templates.TemplateResponse("dashboard_refactored.html", {"request": request})
+        return templates.TemplateResponse("dashboard.html", {"request": request})
     
     # Health check
     @app.get("/health")

@@ -11,6 +11,7 @@ import random
 from typing import List, Optional, Dict, Any
 from urllib.parse import urlencode, urlparse, parse_qs
 import re
+import os
 
 import requests
 from bs4 import BeautifulSoup, Tag
@@ -53,31 +54,31 @@ class Yad2Scraper(BaseScraper):
         """
         params = {}
         
-        # Price range
-        if 'price' in profile_config:
-            price_range = profile_config['price']
-            if 'min' in price_range and price_range['min']:
-                params['priceMin'] = str(price_range['min'])
-            if 'max' in price_range and price_range['max']:
-                params['priceMax'] = str(price_range['max'])
+        # Price range - handle both old and new formats
+        price_config = profile_config.get('price', profile_config.get('price_range', {}))
+        if price_config:
+            if 'min' in price_config and price_config['min']:
+                params['priceMin'] = str(price_config['min'])
+            if 'max' in price_config and price_config['max']:
+                params['priceMax'] = str(price_config['max'])
         
-        # Room range
-        if 'rooms' in profile_config:
-            room_range = profile_config['rooms']
-            if 'min' in room_range and room_range['min']:
-                params['rooms'] = f"{room_range['min']}-"
-            if 'max' in room_range and room_range['max']:
+        # Room range - handle both old and new formats
+        room_config = profile_config.get('rooms', profile_config.get('rooms_range', {}))
+        if room_config:
+            if 'min' in room_config and room_config['min']:
+                params['rooms'] = f"{room_config['min']}-"
+            if 'max' in room_config and room_config['max']:
                 if 'rooms' in params:
-                    params['rooms'] = f"{room_range['min']}-{room_range['max']}"
+                    params['rooms'] = f"{room_config['min']}-{room_config['max']}"
                 else:
-                    params['rooms'] = f"-{room_range['max']}"
+                    params['rooms'] = f"-{room_config['max']}"
         
-        # Location (city)
-        if 'location_criteria' in profile_config:
-            location = profile_config['location_criteria']
-            if 'city' in location and location['city']:
+        # Location (city) - handle both old and new formats
+        location_config = profile_config.get('location_criteria', profile_config.get('location', {}))
+        if location_config:
+            if 'city' in location_config and location_config['city']:
                 # Yad2 uses numeric city codes, we'll need to map common cities
-                city_code = self._get_city_code(location['city'])
+                city_code = self._get_city_code(location_config['city'])
                 if city_code:
                     params['city'] = city_code
         
@@ -144,6 +145,20 @@ class Yad2Scraper(BaseScraper):
             response = self.session.get(search_url, timeout=15)
             response.raise_for_status()
             
+            # Check for ShieldSquare protection
+            if self._detect_shieldsquare_protection(response.text):
+                self.logger.warning("ShieldSquare protection detected!")
+                
+                # Try to use Firecrawl scraper as fallback
+                firecrawl_api_key = os.getenv("FIRECRAWL_API_KEY")
+                if firecrawl_api_key:
+                    self.logger.info("Attempting to bypass protection with Firecrawl...")
+                    return self._scrape_with_firecrawl_fallback(search_url, max_listings)
+                else:
+                    self.logger.error("No Firecrawl API key available - cannot bypass protection")
+                    self.logger.info("To enable advanced scraping, run: python setup_advanced_scraping.py")
+                    return listings
+            
             soup = BeautifulSoup(response.content, 'html.parser')
             
             # Find listing containers (Yad2 structure may change)
@@ -172,6 +187,53 @@ class Yad2Scraper(BaseScraper):
             self.logger.error("Unexpected error scraping Yad2: %s", str(e))
         
         return listings
+    
+    def _detect_shieldsquare_protection(self, html_content: str) -> bool:
+        """Detect if page is showing ShieldSquare protection"""
+        shieldsquare_indicators = [
+            "validate.perfdrive.com",
+            "ShieldSquare",
+            "Bot Management",
+            "human verification",
+            "security check",
+            "Please wait while we verify",
+            "Checking your browser",
+            "blocked"
+        ]
+        
+        html_lower = html_content.lower()
+        for indicator in shieldsquare_indicators:
+            if indicator.lower() in html_lower:
+                return True
+        
+        return False
+    
+    def _scrape_with_firecrawl_fallback(self, search_url: str, max_listings: int) -> List[ScrapedListing]:
+        """Fallback to Firecrawl scraper when protection is detected"""
+        try:
+            # Import Firecrawl scraper
+            from .firecrawl_yad2 import FirecrawlYad2Scraper
+            
+            # Initialize Firecrawl scraper
+            firecrawl_scraper = FirecrawlYad2Scraper()
+            
+            # Use Firecrawl scraper
+            self.logger.info("Using Firecrawl scraper to bypass ShieldSquare protection")
+            listings = firecrawl_scraper.scrape_listings(search_url, max_listings)
+            
+            if listings:
+                self.logger.info("Successfully bypassed protection with Firecrawl - found %d listings", len(listings))
+            else:
+                self.logger.warning("Firecrawl scraper returned no listings - protection may still be active")
+            
+            return listings
+            
+        except ImportError:
+            self.logger.error("Firecrawl scraper not available - install with: pip install firecrawl-py")
+            return []
+        except Exception as e:
+            self.logger.error("Error using Firecrawl scraper: %s", str(e))
+            return []
     
     def _find_listing_containers(self, soup: BeautifulSoup) -> List[Tag]:
         """

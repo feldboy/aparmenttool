@@ -173,3 +173,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 agno/
+
+# Scraping configuration
+.env.scraping
+sessions/
+captcha_images/
+proxy_test_results.txt

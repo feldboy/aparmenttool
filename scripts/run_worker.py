@@ -167,19 +167,56 @@ class RealtyWorker:
     
     async def scan_yad2_for_profile(self, profile: Dict[str, Any]):
         """Scan Yad2 for a specific profile"""
-        # Simulate scraping for now (actual implementation would use Yad2Scraper)
-        logger.info(f"Scanning Yad2 for profile: {profile['profileName']}")
+        profile_name = profile.get('name', profile.get('profile_name', profile.get('profileName', 'Unknown')))
+        logger.info(f"Scanning Yad2 for profile: {profile_name}")
         
-        # Placeholder - return empty list for now
-        return []
+        try:
+            if self.yad2_scraper:
+                # Construct search URL from profile
+                search_url = self.yad2_scraper.construct_search_url(profile)
+                # Run scraper in executor to avoid blocking
+                loop = asyncio.get_event_loop()
+                listings = await loop.run_in_executor(
+                    None, 
+                    self.yad2_scraper.scrape_listings, 
+                    search_url, 
+                    50
+                )
+                logger.info(f"Found {len(listings)} Yad2 listings for profile {profile_name}")
+                return listings
+            else:
+                logger.warning("Yad2 scraper not available, returning empty results")
+                return []
+        except Exception as e:
+            logger.error(f"Error scanning Yad2 for profile {profile_name}: {e}")
+            return []
     
     async def scan_facebook_for_profile(self, profile: Dict[str, Any]):
         """Scan Facebook for a specific profile"""
-        # Simulate scraping for now (actual implementation would use FacebookScraper)
-        logger.info(f"Scanning Facebook for profile: {profile['profileName']}")
+        profile_name = profile.get('name', profile.get('profile_name', profile.get('profileName', 'Unknown')))
+        logger.info(f"Scanning Facebook for profile: {profile_name}")
         
-        # Placeholder - return empty list for now
-        return []
+        try:
+            if self.facebook_scraper:
+                # Check if the profile has Facebook groups configured
+                facebook_groups = profile.get('scan_targets', {}).get('facebook_group_ids', [])
+                if not facebook_groups:
+                    logger.info("No Facebook groups configured for profile")
+                    return []
+                
+                # Construct search URL from profile
+                search_url = self.facebook_scraper.construct_search_url(profile)
+                
+                # Use the async scraper method
+                posts = await self.facebook_scraper.scrape_listings(search_url, 50)
+                logger.info(f"Found {len(posts)} Facebook posts for profile {profile_name}")
+                return posts
+            else:
+                logger.warning("Facebook scraper not available, returning empty results")
+                return []
+        except Exception as e:
+            logger.error(f"Error scanning Facebook for profile {profile_name}: {e}")
+            return []
     
     async def analyze_listings(self, profile: Dict[str, Any], listings: list):
         """Analyze listings against profile criteria with enhanced AI analysis"""
@@ -189,44 +226,16 @@ class RealtyWorker:
         matches = []
         for listing in listings:
             try:
-                if self.content_analyzer:
-                    # Use enhanced analysis with Tavily if available
-                    if hasattr(self.content_analyzer, 'analyze_with_web_context'):
-                        from scrapers import ScrapedListing
-                        # Convert dict to ScrapedListing object
-                        listing_obj = ScrapedListing(
-                            title=listing.get('title', ''),
-                            description=listing.get('description', ''),
-                            price=listing.get('price'),
-                            location=listing.get('location', ''),
-                            rooms=listing.get('rooms'),
-                            url=listing.get('url', ''),
-                            images=listing.get('images', []),
-                            source=listing.get('source', 'unknown'),
-                            raw_data=listing
-                        )
-                        result = await self.content_analyzer.analyze_with_web_context(listing_obj, profile)
-                        
-                        if result and hasattr(result, 'is_match') and result.is_match:
-                            matches.append({
-                                **listing,
-                                'match_score': result.score,
-                                'match_confidence': result.confidence,
-                                'match_reasons': result.reasons
-                            })
-                            logger.info("Enhanced match found: %s (confidence: %s, score: %.2f)", 
-                                       listing.get('title', 'Unknown')[:50], 
-                                       result.confidence, 
-                                       result.score)
-                    else:
-                        # Fallback to basic analysis
+                # Basic filtering first
+                if self.basic_filter_listing(profile, listing):
+                    # If we have content analyzer, use it for advanced filtering
+                    if self.content_analyzer:
+                        # Simplified analysis - just check if it's a match
                         is_match = await self.simulate_content_analysis(profile, listing)
                         if is_match:
                             matches.append(listing)
-                else:
-                    # Simulation fallback
-                    is_match = await self.simulate_content_analysis(profile, listing)
-                    if is_match:
+                    else:
+                        # Use basic filtering result
                         matches.append(listing)
                         
             except Exception as e:
@@ -234,6 +243,55 @@ class RealtyWorker:
                 continue
         
         return matches
+    
+    def basic_filter_listing(self, profile: Dict[str, Any], listing: Dict[str, Any]) -> bool:
+        """Basic filtering based on profile criteria"""
+        try:
+            # Check price range
+            price_range = profile.get('price_range', profile.get('price', {}))
+            if price_range:
+                min_price = price_range.get('min', 0)
+                max_price = price_range.get('max', float('inf'))
+                listing_price = listing.get('price', 0)
+                
+                if listing_price and (listing_price < min_price or listing_price > max_price):
+                    return False
+            
+            # Check rooms range
+            rooms_range = profile.get('rooms_range', profile.get('rooms', {}))
+            if rooms_range:
+                min_rooms = rooms_range.get('min', 0)
+                max_rooms = rooms_range.get('max', float('inf'))
+                listing_rooms = listing.get('rooms', 0)
+                
+                if listing_rooms and (listing_rooms < min_rooms or listing_rooms > max_rooms):
+                    return False
+            
+            # Location filtering - basic keyword matching
+            location_criteria = profile.get('location', profile.get('location_criteria', {}))
+            if location_criteria:
+                city = location_criteria.get('city', '')
+                neighborhoods = location_criteria.get('neighborhoods', [])
+                
+                listing_location = listing.get('location', '').lower()
+                
+                # Check if listing location contains city or neighborhood keywords
+                if city and city.lower() in listing_location:
+                    return True
+                    
+                for neighborhood in neighborhoods:
+                    if neighborhood.lower() in listing_location:
+                        return True
+                        
+                # If we have location criteria but no match, filter out
+                if city or neighborhoods:
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            logger.error("Error in basic filtering: %s", str(e))
+            return False
     
     async def simulate_content_analysis(self, profile: Dict[str, Any], listing: Dict[str, Any]):
         """Simulate content analysis (placeholder)"""

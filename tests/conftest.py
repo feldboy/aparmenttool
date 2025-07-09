@@ -1,5 +1,7 @@
+"""
+Pytest configuration for integration and system tests.
+"""
 import sys
-import os
 from pathlib import Path
 
 # Ensure src/ is in sys.path for all tests

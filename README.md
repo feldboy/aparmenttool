@@ -16,25 +16,28 @@ An autonomous real estate listing aggregator that scans Yad2 and Facebook every 
 
 ```
 aparmenttool/
-├── config/            # Configuration files and environment variables
-├── deployment/        # Docker and deployment configuration files
-├── docs/             # Documentation and guides
-├── frontend/         # Web frontend assets
-├── logs/             # Application logs
-├── scripts/          # Utility and automation scripts
-├── src/              # Source code
-│   ├── analysis/     # Content analysis modules
-│   ├── notifications/# Notification system
-│   ├── scrapers/     # Data scraping modules
-│   ├── search/       # Search functionality
-│   ├── telegram/     # Telegram integration
-│   ├── telegram_bot/ # Telegram bot implementation
-│   └── web/          # Web server and dashboard
-└── tests/            # Test suites
-    ├── epic_tests/   # Tests for project epics
-    ├── integration/  # Integration tests
-    ├── system/       # System tests
-    └── unit/         # Unit tests
+├── config/               # Configuration files and environment variables
+├── deployment/           # Docker and deployment configuration files
+├── docs/                 # Documentation and guides
+├── logs/                 # Application logs
+├── scripts/              # Utility and automation scripts
+│   ├── demo/            # Demo scripts
+│   ├── deployment/      # Deployment utilities
+│   └── setup/           # Setup and initialization scripts
+├── src/                  # Main source code
+│   ├── ai_agents/       # AI agent implementations
+│   ├── analysis/        # Content analysis modules
+│   ├── notifications/   # Notification system
+│   ├── scrapers/        # Data scraping modules
+│   ├── search/          # Search functionality
+│   ├── telegram_bot/    # Telegram bot implementation
+│   ├── telegram_utils/  # Telegram utilities
+│   ├── tests/           # Unit tests
+│   └── web/             # Web server and dashboard
+└── tests/               # Integration and system tests
+    ├── epic_tests/      # Epic/feature tests
+    ├── integration/     # Integration tests
+    └── system/          # System tests
 ```
 
 ## 📋 Project Status

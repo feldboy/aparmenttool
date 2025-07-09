@@ -10,159 +10,180 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-bg: #f8f9fa;
+        /* Loading overlay */
+        #global-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
         }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-bg);
-            direction: rtl;
-        }
-        
-        .navbar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar {
-            background: white;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            min-height: calc(100vh - 76px);
-            padding: 0;
-        }
-        
-        .sidebar .nav-link {
+        .loading-content {
+            text-align: center;
             color: var(--primary-color);
-            padding: 15px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: all 0.3s;
-            text-decoration: none;
         }
         
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background-color: var(--secondary-color);
-            color: white;
-            transform: translateX(-5px);
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 0.3rem solid rgba(44, 62, 80, 0.1);
+            border-top: 0.3rem solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         
-        .sidebar .nav-link i {
-            margin-left: 10px;
-            width: 20px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        .main-content {
-            padding: 20px;
+        .loading-message {
+            margin-top: 1rem;
+            font-size: 1.1rem;
         }
         
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
+        /* Page loading */
+        .page-loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+            color: var(--primary-color);
         }
         
-        .card:hover {
-            transform: translateY(-2px);
+        /* Error states */
+        .error-state {
+            text-align: center;
+            padding: 3rem;
         }
         
-        .card-header {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-bottom: 2px solid var(--secondary-color);
-            border-radius: 15px 15px 0 0 !important;
-            padding: 20px;
+        .error-state i {
+            font-size: 3rem;
+            color: var(--danger-color);
+            margin-bottom: 1rem;
         }
         
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .card {
+                margin-bottom: 15px;
+            }
+            
+            .metric-card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .metric-number {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Status indicators */
         .status-indicator {
             display: inline-block;
             width: 12px;
             height: 12px;
             border-radius: 50%;
             margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
         }
         
         .status-connected { background-color: var(--success-color); }
         .status-disconnected { background-color: var(--danger-color); }
         .status-warning { background-color: var(--warning-color); }
+        .status-error { background-color: var(--danger-color); }
+        
+        /* Profile cards */
+        .profile-card {
+            border-left: 4px solid var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .profile-details .detail-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-details .detail-row i {
+            width: 20px;
+            margin-left: 10px;
+        }
+        
+        /* Notification items */
+        .notification-item {
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item:hover {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Form improvements */
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        /* Button improvements */
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
         
         .btn-primary {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            transition: all 0.3s;
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-        }
-        
-        .metric-card {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .metric-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--secondary-color);
-        }
-        
-        .metric-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-        }
-
-        .system-card {
-            border-right: 4px solid var(--warning-color);
-        }
-        
-        .notification-card {
-            border-right: 4px solid var(--success-color);
-        }
-        
-        .profile-card {
-            border-right: 4px solid var(--secondary-color);
-        }
-        
-        .loading {
-            display: none;
-        }
-        
-        .loading.show {
-            display: block;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                top: 0;
-                right: -100%;
-                width: 100%;
-                z-index: 1000;
-                transition: right 0.3s;
-            }
-            
-            .sidebar.show {
-                right: 0;
-            }
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
         }
     </style>
 </head>
 <body>
+    <!-- Global Loading Overlay -->
+    <div id="global-loading" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-message">מאתחל...</div>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <button class="navbar-toggler d-lg-none" type="button" onclick="toggleSidebar()">
+            <button class="navbar-toggler d-lg-none" type="button" data-sidebar-toggle>
                 <span class="navbar-toggler-icon"></span>
             </button>
             <a class="navbar-brand" href="#">
@@ -176,9 +197,13 @@
                         משתמש
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>הגדרות</a></li>
+                        <li><a class="dropdown-item" href="#" data-nav="settings">
+                            <i class="fas fa-cog me-2"></i>הגדרות
+                        </a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>התנתק</a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-sign-out-alt me-2"></i>התנתק
+                        </a></li>
                     </ul>
                 </div>
             </div>
@@ -190,25 +215,25 @@
             <!-- Sidebar -->
             <div class="col-lg-3 sidebar" id="sidebar">
                 <nav class="nav flex-column">
-                    <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                    <a class="nav-link" href="#" data-nav="dashboard">
                         <i class="fas fa-tachometer-alt"></i>דשבורד
                     </a>
-                    <a class="nav-link" href="#profiles" onclick="showSection('profiles')">
+                    <a class="nav-link" href="#" data-nav="profiles">
                         <i class="fas fa-search"></i>פרופילי חיפוש
                     </a>
-                    <a class="nav-link" href="#telegram" onclick="showSection('telegram')">
+                    <a class="nav-link" href="#" data-nav="telegram">
                         <i class="fab fa-telegram"></i>הגדרות טלגרם
                     </a>
-                    <a class="nav-link" href="#facebook" onclick="showSection('facebook')">
+                    <a class="nav-link" href="#" data-nav="facebook">
                         <i class="fab fa-facebook"></i>הגדרות פייסבוק
                     </a>
-                    <a class="nav-link" href="#yad2" onclick="showSection('yad2')">
+                    <a class="nav-link" href="#" data-nav="yad2">
                         <i class="fas fa-building"></i>הגדרות יד2
                     </a>
-                    <a class="nav-link" href="#notifications" onclick="showSection('notifications')">
+                    <a class="nav-link" href="#" data-nav="notifications">
                         <i class="fas fa-bell"></i>התראות
                     </a>
-                    <a class="nav-link" href="#settings" onclick="showSection('settings')">
+                    <a class="nav-link" href="#" data-nav="settings">
                         <i class="fas fa-cog"></i>הגדרות כלליות
                     </a>
                 </nav>
@@ -218,10 +243,20 @@
             <div class="col-lg-9 main-content">
                 <!-- Dashboard Section -->
                 <div id="dashboard" class="content-section">
-                    <h2 class="mb-4">
-                        <i class="fas fa-tachometer-alt me-2"></i>
-                        דשבורד
-                    </h2>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            דשבורד
+                        </h2>
+                        <button class="btn btn-outline-primary" data-refresh="dashboard" onclick="window.realtyApp.components.dashboard.refresh()">
+                            <i class="fas fa-sync-alt me-2"></i>רענן
+                        </button>
+                    </div>
+                    
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען נתונים...</div>
+                    </div>
                     
                     <!-- Important Notice -->
                     <div class="alert alert-info mb-4">
@@ -233,32 +268,32 @@
                     <div class="row mb-4">
                         <div class="col-md-3">
                             <div class="card metric-card">
-                                <div class="metric-number" id="total-properties">45</div>
+                                <div class="metric-number" id="total-properties">0</div>
                                 <div class="metric-label">דירות נמצאו השבוע</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card metric-card">
-                                <div class="metric-number" id="notifications-sent">12</div>
+                                <div class="metric-number" id="notifications-sent">0</div>
                                 <div class="metric-label">התראות נשלחו</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card metric-card">
-                                <div class="metric-number" id="active-profiles">2</div>
+                                <div class="metric-number" id="active-profiles">0</div>
                                 <div class="metric-label">פרופילים פעילים</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card metric-card">
-                                <div class="metric-number" id="system-uptime">98%</div>
+                                <div class="metric-number" id="system-uptime">0%</div>
                                 <div class="metric-label">זמינות המערכת</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Status Cards -->
-                    <div class="row">
+                    <div class="row mb-4">
                         <div class="col-lg-6">
                             <div class="card system-card">
                                 <div class="card-header">
@@ -268,18 +303,18 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2" id="yad2-status">
                                         <span>יד2</span>
                                         <span>
                                             <span class="status-indicator status-connected"></span>
-                                            פעיל
+                                            <span class="status-text">בודק...</span>
                                         </span>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex justify-content-between align-items-center" id="facebook-status">
                                         <span>פייסבוק</span>
                                         <span>
                                             <span class="status-indicator status-warning"></span>
-                                            דורש התחברות
+                                            <span class="status-text">בודק...</span>
                                         </span>
                                     </div>
                                 </div>
@@ -294,32 +329,76 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2" id="telegram-status">
                                         <span>טלגרם</span>
                                         <span>
                                             <span class="status-indicator status-connected"></span>
-                                            מחובר
+                                            <span class="status-text">בודק...</span>
                                         </span>
                                     </div>
-                                    <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex justify-content-between align-items-center" id="email-status">
                                         <span>אימייל</span>
                                         <span>
                                             <span class="status-indicator status-disconnected"></span>
-                                            לא פעיל
+                                            <span class="status-text">בודק...</span>
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-history me-2"></i>
+                                פעילות אחרונה
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-activity">
+                                <div class="text-center text-muted py-3">טוען פעילות...</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Telegram Settings Section -->
+                <!-- Profiles Section -->
+                <div id="profiles" class="content-section" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">
+                            <i class="fas fa-search me-2"></i>
+                            פרופילי חיפוש
+                        </h2>
+                        <button class="btn btn-primary" onclick="window.realtyApp.components.profiles.showAddModal()">
+                            <i class="fas fa-plus me-2"></i>
+                            הוסף פרופיל חדש
+                        </button>
+                    </div>
+
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען פרופילים...</div>
+                    </div>
+
+                    <!-- Profiles List -->
+                    <div class="row" id="profiles-list">
+                        <!-- Profiles will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Telegram Section -->
                 <div id="telegram" class="content-section" style="display: none;">
                     <h2 class="mb-4">
                         <i class="fab fa-telegram me-2"></i>
                         הגדרות טלגרם
                     </h2>
+
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען הגדרות...</div>
+                    </div>
 
                     <div class="card">
                         <div class="card-header">
@@ -331,12 +410,18 @@
                                 <strong>חשוב:</strong> הטלגרם משמש אך ורק לקבלת התראות על דירות. כל הניהול נעשה דרך האתר הזה בלבד.
                             </div>
 
+                            <div id="telegram-connection-status" class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                בודק סטטוס חיבור...
+                            </div>
+
                             <div class="mb-3">
                                 <label for="telegram-chat-id" class="form-label">Chat ID</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="telegram-chat-id" 
                                            placeholder="הכנס את ה-Chat ID שלך">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="findChatId()">
+                                    <button class="btn btn-outline-secondary" type="button" 
+                                            data-action="find-chat-id" onclick="window.realtyApp.components.telegram.findChatId()">
                                         <i class="fas fa-search"></i> חפש
                                     </button>
                                 </div>
@@ -348,11 +433,13 @@
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button class="btn btn-primary" onclick="saveTelegramSettings()">
+                                <button class="btn btn-primary" data-action="save-telegram" 
+                                        onclick="window.realtyApp.components.telegram.saveConfig()">
                                     <i class="fas fa-save me-2"></i>
                                     שמור הגדרות
                                 </button>
-                                <button class="btn btn-outline-primary" onclick="testTelegramConnection()">
+                                <button class="btn btn-outline-primary" data-action="test-telegram" 
+                                        onclick="window.realtyApp.components.telegram.testConnection()">
                                     <i class="fas fa-paper-plane me-2"></i>
                                     שלח הודעת בדיקה
                                 </button>
@@ -361,31 +448,17 @@
                     </div>
                 </div>
 
-                <!-- Profiles Management Section -->
-                <div id="profiles" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="mb-0">
-                            <i class="fas fa-search me-2"></i>
-                            פרופילי חיפוש
-                        </h2>
-                        <button class="btn btn-primary" onclick="showAddProfileModal()">
-                            <i class="fas fa-plus me-2"></i>
-                            הוסף פרופיל חדש
-                        </button>
-                    </div>
-
-                    <!-- Profiles List -->
-                    <div class="row" id="profiles-list">
-                        <!-- Profiles will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Facebook Settings Section -->
+                <!-- Facebook Section -->
                 <div id="facebook" class="content-section" style="display: none;">
                     <h2 class="mb-4">
                         <i class="fab fa-facebook me-2"></i>
                         הגדרות פייסבוק
                     </h2>
+
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען הגדרות...</div>
+                    </div>
 
                     <!-- Connection Status -->
                     <div class="card mb-4">
@@ -393,207 +466,89 @@
                             <h5 class="mb-0">סטטוס חיבור</h5>
                         </div>
                         <div class="card-body">
-                            <div id="facebook-status" class="d-flex align-items-center">
+                            <div id="facebook-connection-status" class="d-flex align-items-center">
                                 <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                                 <span>בודק סטטוס...</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Login Section -->
-                    <div class="card mb-4" id="facebook-login-section">
-                        <div class="card-header">
-                            <h5 class="mb-0">התחברות לפייסבוק</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>שים לב:</strong> אנו נשתמש בחשבון הפייסבוק שלך רק לקריאת פוסטים מקבוצות ציבוריות. לא נפרסם דבר בשמך.
+                            <div class="mt-3">
+                                <button class="btn btn-primary" data-action="connect-facebook" 
+                                        onclick="window.realtyApp.components.facebook.connectFacebook()">
+                                    <i class="fab fa-facebook me-2"></i>התחבר לפייסבוק
+                                </button>
                             </div>
-                            <button class="btn btn-primary" onclick="connectFacebook()">
-                                <i class="fab fa-facebook me-2"></i>
-                                התחבר לפייסבוק
-                            </button>
                         </div>
                     </div>
 
-                    <!-- Groups Configuration -->
-                    <div class="card" id="facebook-groups-section" style="display: none;">
+                    <!-- Facebook Groups -->
+                    <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">קבוצות פייסבוק לסריקה</h5>
-                            <button class="btn btn-sm btn-outline-primary" onclick="addFacebookGroup()">
-                                <i class="fas fa-plus me-1"></i>
-                                הוסף קבוצה
+                            <h5 class="mb-0">קבוצות פייסבוק</h5>
+                            <button class="btn btn-outline-primary btn-sm" onclick="window.realtyApp.components.facebook.addGroup()">
+                                <i class="fas fa-plus me-1"></i>הוסף קבוצה
                             </button>
                         </div>
                         <div class="card-body">
-                            <div id="facebook-groups-list">
-                                <!-- Groups will be loaded here -->
+                            <div id="facebook-groups-list" class="list-group">
+                                <div class="text-muted">טוען קבוצות...</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Yad2 Settings Section -->
+                <!-- Yad2 Section -->
                 <div id="yad2" class="content-section" style="display: none;">
                     <h2 class="mb-4">
                         <i class="fas fa-building me-2"></i>
                         הגדרות יד2
                     </h2>
 
-                    <!-- Scan Status -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">סטטוס סריקה</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>סטטוס:</span>
-                                        <span class="badge bg-success">פעיל</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>סריקה אחרונה:</span>
-                                        <span class="text-muted">לפני 2 דקות</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span>תדירות סריקה:</span>
-                                        <span>כל 5 דקות</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>דירות נמצאו היום:</span>
-                                        <span class="badge bg-info">32</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span>התראות נשלחו:</span>
-                                        <span class="badge bg-primary">8</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען הגדרות...</div>
                     </div>
 
-                    <!-- Search URLs Configuration -->
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">כתובות חיפוש</h5>
-                            <button class="btn btn-sm btn-outline-primary" onclick="addYad2Url()">
-                                <i class="fas fa-plus me-1"></i>
-                                הוסף כתובת חיפוש
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>טיפ:</strong> צור חיפוש באתר יד2, העתק את הכתובת והוסף אותה כאן כדי לקבל התראות אוטומטיות.
-                            </div>
-                            <div id="yad2-urls-list">
-                                <!-- URLs will be loaded here -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Scan Settings -->
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">הגדרות סריקה</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="scan-frequency" class="form-label">תדירות סריקה (דקות)</label>
-                                        <select class="form-select" id="scan-frequency">
-                                            <option value="60">כל שעה</option>
-                                            <option value="30">כל 30 דקות</option>
-                                            <option value="15">כל 15 דקות</option>
-                                            <option value="10">כל 10 דקות</option>
-                                            <option value="5" selected>כל 5 דקות</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="auto-scan" checked>
-                                            <label class="form-check-label" for="auto-scan">
-                                                סריקה אוטומטית
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="yad2-scan-interval" class="form-label">תדירות סריקה (דקות)</label>
+                                <input type="number" class="form-control" id="yad2-scan-interval" 
+                                       min="1" max="60" value="5">
+                                <div class="form-text">תדירות הסריקה של יד2 לדירות חדשות</div>
                             </div>
-                            <button class="btn btn-primary" onclick="saveYad2Settings()">
-                                <i class="fas fa-save me-2"></i>
-                                שמור הגדרות
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span>סטטוס:</span>
+                                <span id="yad2-status-badge">
+                                    <span class="badge bg-secondary">בודק...</span>
+                                </span>
+                            </div>
+
+                            <button class="btn btn-primary" data-action="save-yad2" 
+                                    onclick="window.realtyApp.components.yad2.saveConfig()">
+                                <i class="fas fa-save me-2"></i>שמור הגדרות
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Notifications History Section -->
+                <!-- Notifications Section -->
                 <div id="notifications" class="content-section" style="display: none;">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h2 class="mb-0">
-                            <i class="fas fa-bell me-2"></i>
-                            התראות אחרונות
-                        </h2>
-                        <div class="btn-group">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="loadNotifications('all')">
-                                הכל
-                            </button>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="loadNotifications('today')">
-                                היום
-                            </button>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="loadNotifications('week')">
-                                השבוע
-                            </button>
-                        </div>
+                    <h2 class="mb-4">
+                        <i class="fas fa-bell me-2"></i>
+                        התראות
+                    </h2>
+
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען התראות...</div>
                     </div>
 
-                    <!-- Statistics Cards -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary" id="total-notifications">156</h5>
-                                    <p class="card-text">סה"כ התראות</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title text-info" id="today-notifications">12</h5>
-                                    <p class="card-text">היום</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title text-success" id="success-rate">98%</h5>
-                                    <p class="card-text">אחוז הצלחה</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title text-warning" id="pending-notifications">3</h5>
-                                    <p class="card-text">ממתינות</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Notifications List -->
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">רשימת התראות</h5>
+                            <h5 class="mb-0">התראות אחרונות</h5>
                         </div>
                         <div class="card-body">
                             <div id="notifications-list">
@@ -603,391 +558,73 @@
                     </div>
                 </div>
 
-                <!-- General Settings Section -->
+                <!-- Settings Section -->
                 <div id="settings" class="content-section" style="display: none;">
                     <h2 class="mb-4">
                         <i class="fas fa-cog me-2"></i>
                         הגדרות כלליות
                     </h2>
 
-                    <!-- Notification Preferences -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">העדפות התראות</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6>ערוצי התראות</h6>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="telegram-notifications" checked>
-                                        <label class="form-check-label" for="telegram-notifications">
-                                            טלגרם
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="email-notifications">
-                                        <label class="form-check-label" for="email-notifications">
-                                            אימייל
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="browser-notifications" checked>
-                                        <label class="form-check-label" for="browser-notifications">
-                                            התראות דפדפן
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6>שעות שקט</h6>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <label for="quiet-start" class="form-label">התחלה</label>
-                                            <input type="time" class="form-control" id="quiet-start" value="23:00">
-                                        </div>
-                                        <div class="col-6">
-                                            <label for="quiet-end" class="form-label">סיום</label>
-                                            <input type="time" class="form-control" id="quiet-end" value="07:00">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="max-notifications" class="form-label">מקסימום התראות ליום</label>
-                                        <input type="number" class="form-control" id="max-notifications" value="10" min="1" max="50">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="include-images" checked>
-                                            <label class="form-check-label" for="include-images">
-                                                כלול תמונות בהתראות
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="page-loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2">טוען הגדרות...</div>
                     </div>
 
-                    <!-- System Preferences -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">העדפות מערכת</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="language" class="form-label">שפה</label>
-                                        <select class="form-select" id="language">
-                                            <option value="he" selected>עברית</option>
-                                            <option value="en">English</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="timezone" class="form-label">אזור זמן</label>
-                                        <select class="form-select" id="timezone">
-                                            <option value="Asia/Jerusalem" selected>ירושלים (GMT+2)</option>
-                                            <option value="UTC">UTC</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="dark-mode">
-                                        <label class="form-check-label" for="dark-mode">
-                                            מצב כהה
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="auto-refresh" checked>
-                                        <label class="form-check-label" for="auto-refresh">
-                                            רענון אוטומטי של הדשבורד
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Data Management -->
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">ניהול נתונים</h5>
+                            <h5 class="mb-0">הגדרות מערכת</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>ייצוא נתונים</h6>
-                                    <div class="d-grid gap-2">
-                                        <button class="btn btn-outline-primary" onclick="exportData('profiles')">
-                                            <i class="fas fa-download me-2"></i>
-                                            ייצא פרופילי חיפוש
-                                        </button>
-                                        <button class="btn btn-outline-primary" onclick="exportData('notifications')">
-                                            <i class="fas fa-download me-2"></i>
-                                            ייצא היסטוריית התראות
-                                        </button>
+                                    <div class="mb-3">
+                                        <label for="setting-notification_frequency" class="form-label">תדירות התראות</label>
+                                        <select class="form-select" id="setting-notification_frequency">
+                                            <option value="immediate">מיידי</option>
+                                            <option value="hourly">כל שעה</option>
+                                            <option value="daily">יומי</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>ייבוא נתונים</h6>
                                     <div class="mb-3">
-                                        <label for="import-file" class="form-label">בחר קובץ לייבוא</label>
-                                        <input type="file" class="form-control" id="import-file" accept=".json,.csv">
+                                        <label for="setting-max_notifications_per_day" class="form-label">מקסימום התראות ביום</label>
+                                        <input type="number" class="form-control" id="setting-max_notifications_per_day" 
+                                               min="1" max="100" value="10">
                                     </div>
-                                    <button class="btn btn-outline-success" onclick="importData()">
-                                        <i class="fas fa-upload me-2"></i>
-                                        ייבא נתונים
-                                    </button>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="alert alert-warning">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>אזהרה:</strong> מחיקת נתונים היא פעולה בלתי הפיכה.
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="setting-quiet_hours_start" class="form-label">שעות שקט - התחלה</label>
+                                        <input type="time" class="form-control" id="setting-quiet_hours_start" value="22:00">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="setting-quiet_hours_end" class="form-label">שעות שקט - סיום</label>
+                                        <input type="time" class="form-control" id="setting-quiet_hours_end" value="08:00">
+                                    </div>
+                                </div>
                             </div>
-                            <button class="btn btn-outline-danger" onclick="clearAllData()">
-                                <i class="fas fa-trash me-2"></i>
-                                מחק את כל הנתונים
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="setting-email_notifications">
+                                    <label class="form-check-label" for="setting-email_notifications">
+                                        אפשר התראות דואר אלקטרוני
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" data-action="save-settings" 
+                                    onclick="window.realtyApp.components.settings.saveSettings()">
+                                <i class="fas fa-save me-2"></i>שמור הגדרות
                             </button>
                         </div>
                     </div>
-
-                    <!-- Save Settings -->
-                    <div class="mt-4">
-                        <button class="btn btn-primary" onclick="saveGeneralSettings()">
-                            <i class="fas fa-save me-2"></i>
-                            שמור כל ההגדרות
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Profile Modal -->
-    <div class="modal fade" id="profileModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="profileModalTitle">הוסף פרופיל חיפוש חדש</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="profileForm">
-                        <input type="hidden" id="profileId" value="">
-                        
-                        <div class="mb-3">
-                            <label for="profileName" class="form-label">שם הפרופיל *</label>
-                            <input type="text" class="form-control" id="profileName" required>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="minPrice" class="form-label">מחיר מינימום (₪)</label>
-                                    <input type="number" class="form-control" id="minPrice" min="0">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="maxPrice" class="form-label">מחיר מקסימום (₪)</label>
-                                    <input type="number" class="form-control" id="maxPrice" min="0">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="minRooms" class="form-label">מינימום חדרים</label>
-                                    <select class="form-select" id="minRooms">
-                                        <option value="">לא משנה</option>
-                                        <option value="1">1</option>
-                                        <option value="1.5">1.5</option>
-                                        <option value="2">2</option>
-                                        <option value="2.5">2.5</option>
-                                        <option value="3">3</option>
-                                        <option value="3.5">3.5</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5+</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="maxRooms" class="form-label">מקסימום חדרים</label>
-                                    <select class="form-select" id="maxRooms">
-                                        <option value="">לא משנה</option>
-                                        <option value="1">1</option>
-                                        <option value="1.5">1.5</option>
-                                        <option value="2">2</option>
-                                        <option value="2.5">2.5</option>
-                                        <option value="3">3</option>
-                                        <option value="3.5">3.5</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5+</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="city" class="form-label">עיר</label>
-                            <select class="form-select" id="city">
-                                <option value="">בחר עיר</option>
-                                <option value="תל אביב - יפו">תל אביב - יפו</option>
-                                <option value="ירושלים">ירושלים</option>
-                                <option value="חיפה">חיפה</option>
-                                <option value="ראשון לציון">ראשון לציון</option>
-                                <option value="פתח תקווה">פתח תקווה</option>
-                                <option value="אשדוד">אשדוד</option>
-                                <option value="נתניה">נתניה</option>
-                                <option value="באר שבע">באר שבע</option>
-                                <option value="בני ברק">בני ברק</option>
-                                <option value="רמת גן">רמת גן</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="neighborhoods" class="form-label">שכונות (אופציונלי)</label>
-                            <input type="text" class="form-control" id="neighborhoods" 
-                                   placeholder="הזן שכונות מופרדות בפסיק">
-                            <div class="form-text">לדוגמה: פלורנטין, נווה צדק, רוטשילד</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">סוגי נכסים</label>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="apartment" value="דירה" checked>
-                                        <label class="form-check-label" for="apartment">דירה</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="garden-apartment" value="דירת גן">
-                                        <label class="form-check-label" for="garden-apartment">דירת גן</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="penthouse" value="פנטהאוז">
-                                        <label class="form-check-label" for="penthouse">פנטהאוז</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="house" value="בית">
-                                        <label class="form-check-label" for="house">בית</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="studio" value="סטודיו">
-                                        <label class="form-check-label" for="studio">סטודיו</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="loft" value="לופט">
-                                        <label class="form-check-label" for="loft">לופט</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="isActive" checked>
-                            <label class="form-check-label" for="isActive">
-                                פרופיל פעיל (קבל התראות)
-                            </label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
-                    <button type="button" class="btn btn-primary" onclick="saveProfile()">שמור פרופיל</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Facebook Group Modal -->
-    <div class="modal fade" id="facebookGroupModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">הוסף קבוצת פייסבוק</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="facebookGroupForm">
-                        <div class="mb-3">
-                            <label for="groupUrl" class="form-label">כתובת הקבוצה *</label>
-                            <input type="url" class="form-control" id="groupUrl" required
-                                   placeholder="https://facebook.com/groups/...">
-                        </div>
-                        <div class="mb-3">
-                            <label for="groupName" class="form-label">שם הקבוצה</label>
-                            <input type="text" class="form-control" id="groupName"
-                                   placeholder="השם יתמלא אוטומטיות">
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="groupActive" checked>
-                            <label class="form-check-label" for="groupActive">
-                                קבוצה פעילה לסריקה
-                            </label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
-                    <button type="button" class="btn btn-primary" onclick="saveFacebookGroup()">הוסף קבוצה</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Yad2 URL Modal -->
-    <div class="modal fade" id="yad2UrlModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">הוסף כתובת חיפוש יד2</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="yad2UrlForm">
-                        <div class="mb-3">
-                            <label for="searchUrl" class="form-label">כתובת חיפוש *</label>
-                            <input type="url" class="form-control" id="searchUrl" required
-                                   placeholder="https://www.yad2.co.il/realestate/rent?...">
-                            <div class="form-text">
-                                צור חיפוש באתר יד2, העתק את הכתובת והדבק כאן
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="searchName" class="form-label">שם החיפוש</label>
-                            <input type="text" class="form-control" id="searchName"
-                                   placeholder="לדוגמה: דירות 3 חדרים בתל אביב">
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="searchActive" checked>
-                            <label class="form-check-label" for="searchActive">
-                                חיפוש פעיל
-                            </label>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
-                    <button type="button" class="btn btn-primary" onclick="saveYad2Url()">הוסף חיפוש</button>
                 </div>
             </div>
         </div>
@@ -996,1114 +633,11 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script>
-        // Global state
-        let currentSection = 'dashboard';
-        let currentProfile = null;
-        let profiles = [];
-        let notifications = [];
-        let yad2Urls = [];
-        let facebookGroups = [];
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
-            setupSectionHandlers();
-        });
-
-        // Setup section-specific handlers
-        function setupSectionHandlers() {
-            // Load data when sections are shown
-            const sectionHandlers = {
-                'profiles': loadProfiles,
-                'facebook': loadFacebookStatus,
-                'yad2': loadYad2Settings,
-                'notifications': loadNotifications,
-                'settings': loadGeneralSettings
-            };
-
-            Object.keys(sectionHandlers).forEach(section => {
-                const handler = sectionHandlers[section];
-                const original = window[`showSection`];
-                
-                // Override showSection to trigger data loading
-                window.showSection = function(sectionName) {
-                    // Call original function
-                    showSectionOriginal(sectionName);
-                    
-                    // Load section-specific data
-                    if (sectionHandlers[sectionName]) {
-                        sectionHandlers[sectionName]();
-                    }
-                };
-            });
-        }
-
-        // Section navigation
-        function showSectionOriginal(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName).style.display = 'block';
-            
-            // Update navigation
-            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            document.querySelector(`[onclick="showSection('${sectionName}')"]`).classList.add('active');
-            
-            currentSection = sectionName;
-            
-            // Hide sidebar on mobile
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.remove('show');
-            }
-        }
-
-        function showSection(sectionName) {
-            showSectionOriginal(sectionName);
-            
-            // Load section-specific data
-            const handlers = {
-                'profiles': loadProfiles,
-                'facebook': loadFacebookStatus,
-                'yad2': loadYad2Settings,
-                'notifications': () => loadNotifications('all'),
-                'settings': loadGeneralSettings
-            };
-
-            if (handlers[sectionName]) {
-                handlers[sectionName]();
-            }
-        }
-
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
-        }
-
-        // API functions 
-        async function apiCall(endpoint, method = 'GET', data = null) {
-            try {
-                const options = {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                };
-                
-                if (data) {
-                    options.body = JSON.stringify(data);
-                }
-                
-                // Use real API calls
-                const response = await fetch(`/api/v1${endpoint}`, options);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-                
-            } catch (error) {
-                console.error('API Error:', error);
-                // Fallback to mock data for demonstration
-                return getMockApiResponse(endpoint, method, data);
-            }
-        }
-
-        function getMockApiResponse(endpoint, method, data) {
-            console.log(`Mock API: ${method} ${endpoint}`, data);
-            
-            // Mock profiles data
-            if (endpoint === '/profiles') {
-                if (method === 'GET') {
-                    return {
-                        profiles: [
-                            {
-                                id: 'profile_1',
-                                name: 'דירה בתל אביב',
-                                price_range: {min: 4000, max: 7000},
-                                rooms_range: {min: 2, max: 3},
-                                location: {
-                                    city: 'תל אביב - יפו',
-                                    neighborhoods: ['פלורנטין', 'נווה צדק']
-                                },
-                                property_types: ['דירה', 'דירת גן'],
-                                is_active: true,
-                                created_at: '2025-06-25T10:00:00Z',
-                                last_match: '2025-06-28T14:30:00Z'
-                            },
-                            {
-                                id: 'profile_2',
-                                name: 'בית בירושלים',
-                                price_range: {min: 3000, max: 5000},
-                                rooms_range: {min: 3, max: 5},
-                                location: {
-                                    city: 'ירושלים',
-                                    neighborhoods: ['גבעת שאול', 'רמות']
-                                },
-                                property_types: ['בית', 'דירה'],
-                                is_active: false,
-                                created_at: '2025-06-20T15:20:00Z',
-                                last_match: null
-                            }
-                        ],
-                        total: 2
-                    };
-                } else if (method === 'POST') {
-                    const newProfile = {
-                        id: 'profile_' + Date.now(),
-                        ...data,
-                        created_at: new Date().toISOString()
-                    };
-                    return { profile: newProfile, message: 'Profile created successfully' };
-                }
-            }
-
-            // Mock notifications data
-            if (endpoint === '/notifications' || endpoint.startsWith('/notifications')) {
-                return {
-                    notifications: [
-                        {
-                            id: 'notif_1',
-                            title: 'דירה חדשה בפלורנטין',
-                            message: '3 חדרים, 5,800 ₪, פלורנטין - דירה מקסימה עם מרפסת',
-                            source: 'יד2',
-                            property_url: 'https://www.yad2.co.il/item/123456',
-                            image_url: 'https://via.placeholder.com/300x200',
-                            timestamp: '2025-06-29T15:30:00Z',
-                            sent: true,
-                            channel: 'telegram',
-                            profile_name: 'דירה בתל אביב'
-                        },
-                        {
-                            id: 'notif_2',
-                            title: 'דירה בנווה צדק',
-                            message: '2.5 חדרים, 6,200 ₪, נווה צדק - דירה משופצת בבניין בוטיק',
-                            source: 'פייסבוק',
-                            property_url: 'https://facebook.com/groups/telaviv/posts/123',
-                            image_url: 'https://via.placeholder.com/300x200',
-                            timestamp: '2025-06-29T12:15:00Z',
-                            sent: true,
-                            channel: 'telegram',
-                            profile_name: 'דירה בתל אביב'
-                        },
-                        {
-                            id: 'notif_3',
-                            title: 'דירה ברוטשילד',
-                            message: '3 חדרים, 6,500 ₪, שדרות רוטשילד - דירה עם חניה',
-                            source: 'יד2',
-                            property_url: 'https://www.yad2.co.il/item/789012',
-                            image_url: null,
-                            timestamp: '2025-06-28T18:45:00Z',
-                            sent: true,
-                            channel: 'telegram',
-                            profile_name: 'דירה בתל אביב'
-                        }
-                    ],
-                    total: 3
-                };
-            }
-
-            // Mock Facebook status
-            if (endpoint === '/facebook/status') {
-                return {
-                    connected: false,
-                    session_valid: false,
-                    groups_configured: 0,
-                    last_login: null,
-                    requires_reauth: true
-                };
-            }
-
-            // Mock Facebook groups
-            if (endpoint === '/facebook/groups') {
-                return {
-                    groups: [
-                        {
-                            id: '123456789',
-                            name: 'דירות להשכרה תל אביב',
-                            url: 'https://facebook.com/groups/123456789',
-                            members: 15420,
-                            last_scan: '2025-06-29T15:00:00Z',
-                            active: true
-                        },
-                        {
-                            id: '987654321',
-                            name: 'השכרת דירות ירושלים',
-                            url: 'https://facebook.com/groups/987654321',
-                            members: 8900,
-                            last_scan: '2025-06-29T14:30:00Z',
-                            active: true
-                        }
-                    ],
-                    total: 2
-                };
-            }
-
-            // Mock Yad2 settings
-            if (endpoint === '/yad2/config') {
-                return {
-                    config: {
-                        search_urls: [
-                            {
-                                id: 'url_1',
-                                name: 'דירות 3 חדרים בתל אביב',
-                                url: 'https://www.yad2.co.il/realestate/rent?city=5000&rooms=2-3&price=3000-6000',
-                                active: true,
-                                last_scan: '2025-06-29T15:25:00Z'
-                            }
-                        ],
-                        scan_frequency: 300,
-                        last_scan: '2025-06-29T15:25:00Z',
-                        active: true
-                    }
-                };
-            }
-
-            // Mock system status
-            if (endpoint === '/system/status') {
-                return {
-                    scanner_status: {
-                        yad2: { status: "active", last_scan: "2025-06-29T15:25:00Z" },
-                        facebook: { status: "requires_auth", last_scan: null }
-                    },
-                    notification_status: {
-                        telegram: { status: "connected", last_sent: "2025-06-29T14:30:00Z" },
-                        email: { status: "disabled" }
-                    }
-                };
-            }
-
-            if (endpoint === '/analytics/summary?days=7') {
-                return {
-                    analytics: {
-                        total_properties_found: 45,
-                        notifications_sent: 12,
-                        profiles_active: 2
-                    }
-                };
-            }
-
-            // Default success response
-            return { success: true, message: 'הפעולה בוצעה בהצלחה' };
-        }
-
-        // Dashboard data loading
-        async function loadDashboardData() {
-            try {
-                const [systemStatus, analytics] = await Promise.all([
-                    apiCall('/system/status'),
-                    apiCall('/analytics/summary?days=7')
-                ]);
-
-                // Update dashboard stats
-                document.getElementById('total-properties').textContent = analytics.analytics.total_properties_found;
-                document.getElementById('notifications-sent').textContent = analytics.analytics.notifications_sent;
-                document.getElementById('active-profiles').textContent = analytics.analytics.profiles_active;
-                document.getElementById('system-uptime').textContent = '98%';
-            } catch (error) {
-                console.error('Failed to load dashboard data:', error);
-            }
-        }
-
-        // ===== PROFILES MANAGEMENT =====
-
-        async function loadProfiles() {
-            try {
-                const response = await apiCall('/profiles');
-                profiles = response.profiles;
-                renderProfiles();
-            } catch (error) {
-                showAlert('שגיאה בטעינת הפרופילים', 'danger');
-            }
-        }
-
-        function renderProfiles() {
-            const container = document.getElementById('profiles-list');
-            if (!container) return;
-
-            if (profiles.length === 0) {
-                container.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle me-2"></i>
-                            לא נמצאו פרופילי חיפוש. לחץ על "הוסף פרופיל חדש" כדי להתחיל.
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = profiles.map(profile => `
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">${profile.name}</h6>
-                            <span class="badge bg-${profile.is_active ? 'success' : 'secondary'}">
-                                ${profile.is_active ? 'פעיל' : 'לא פעיל'}
-                            </span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-2">
-                                <small class="text-muted">מחיר:</small>
-                                <span>${profile.price_range.min ? profile.price_range.min.toLocaleString() + '₪' : 'ללא מינימום'} - ${profile.price_range.max ? profile.price_range.max.toLocaleString() + '₪' : 'ללא מקסימום'}</span>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted">חדרים:</small>
-                                <span>${profile.rooms_range.min || 'ללא מינימום'} - ${profile.rooms_range.max || 'ללא מקסימום'}</span>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted">עיר:</small>
-                                <span>${profile.location.city || 'לא צוין'}</span>
-                            </div>
-                            ${profile.location.neighborhoods && profile.location.neighborhoods.length > 0 ? `
-                                <div class="mb-2">
-                                    <small class="text-muted">שכונות:</small>
-                                    <div class="mt-1">
-                                        ${profile.location.neighborhoods.map(n => `<span class="badge bg-light text-dark me-1">${n}</span>`).join('')}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            <div class="mb-3">
-                                <small class="text-muted">התאמה אחרונה:</small>
-                                <span>${profile.last_match ? formatDate(profile.last_match) : 'אין'}</span>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="btn-group w-100">
-                                <button class="btn btn-outline-primary btn-sm" onclick="editProfile('${profile.id}')">
-                                    <i class="fas fa-edit"></i> ערוך
-                                </button>
-                                <button class="btn btn-outline-${profile.is_active ? 'warning' : 'success'} btn-sm" onclick="toggleProfile('${profile.id}')">
-                                    <i class="fas fa-${profile.is_active ? 'pause' : 'play'}"></i>
-                                    ${profile.is_active ? 'השבת' : 'הפעל'}
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="deleteProfile('${profile.id}')">
-                                    <i class="fas fa-trash"></i> מחק
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showAddProfileModal() {
-            currentProfile = null;
-            document.getElementById('profileModalTitle').textContent = 'הוסף פרופיל חיפוש חדש';
-            document.getElementById('profileForm').reset();
-            document.getElementById('profileId').value = '';
-            new bootstrap.Modal(document.getElementById('profileModal')).show();
-        }
-
-        function editProfile(profileId) {
-            const profile = profiles.find(p => p.id === profileId);
-            if (!profile) return;
-
-            currentProfile = profile;
-            document.getElementById('profileModalTitle').textContent = 'ערוך פרופיל חיפוש';
-            document.getElementById('profileId').value = profile.id;
-            document.getElementById('profileName').value = profile.name;
-            document.getElementById('minPrice').value = profile.price_range.min || '';
-            document.getElementById('maxPrice').value = profile.price_range.max || '';
-            document.getElementById('minRooms').value = profile.rooms_range.min || '';
-            document.getElementById('maxRooms').value = profile.rooms_range.max || '';
-            document.getElementById('city').value = profile.location.city || '';
-            document.getElementById('neighborhoods').value = profile.location.neighborhoods ? profile.location.neighborhoods.join(', ') : '';
-            document.getElementById('isActive').checked = profile.is_active;
-
-            // Set property types
-            document.querySelectorAll('input[type="checkbox"][value]').forEach(checkbox => {
-                checkbox.checked = profile.property_types.includes(checkbox.value);
-            });
-
-            new bootstrap.Modal(document.getElementById('profileModal')).show();
-        }
-
-        async function saveProfile() {
-            const form = document.getElementById('profileForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const profileId = document.getElementById('profileId').value;
-            const propertyTypes = Array.from(document.querySelectorAll('input[type="checkbox"][value]:checked'))
-                .map(cb => cb.value);
-
-            const profileData = {
-                name: document.getElementById('profileName').value,
-                price_range: {
-                    min: parseInt(document.getElementById('minPrice').value) || null,
-                    max: parseInt(document.getElementById('maxPrice').value) || null
-                },
-                rooms_range: {
-                    min: parseFloat(document.getElementById('minRooms').value) || null,
-                    max: parseFloat(document.getElementById('maxRooms').value) || null
-                },
-                location: {
-                    city: document.getElementById('city').value,
-                    neighborhoods: document.getElementById('neighborhoods').value.split(',').map(s => s.trim()).filter(s => s)
-                },
-                property_types: propertyTypes,
-                is_active: document.getElementById('isActive').checked
-            };
-
-            try {
-                if (profileId) {
-                    await apiCall(`/profiles/${profileId}`, 'PUT', profileData);
-                    showAlert('הפרופיל עודכן בהצלחה', 'success');
-                } else {
-                    await apiCall('/profiles', 'POST', profileData);
-                    showAlert('הפרופיל נוצר בהצלחה', 'success');
-                }
-
-                bootstrap.Modal.getInstance(document.getElementById('profileModal')).hide();
-                loadProfiles();
-            } catch (error) {
-                showAlert('שגיאה בשמירת הפרופיל', 'danger');
-            }
-        }
-
-        async function toggleProfile(profileId) {
-            const profile = profiles.find(p => p.id === profileId);
-            if (!profile) return;
-
-            try {
-                await apiCall(`/profiles/${profileId}`, 'PUT', { is_active: !profile.is_active });
-                showAlert(`הפרופיל ${profile.is_active ? 'הושבת' : 'הופעל'} בהצלחה`, 'success');
-                loadProfiles();
-            } catch (error) {
-                showAlert('שגיאה בעדכון הפרופיל', 'danger');
-            }
-        }
-
-        async function deleteProfile(profileId) {
-            const profile = profiles.find(p => p.id === profileId);
-            if (!profile) return;
-
-            if (!confirm(`האם אתה בטוח שברצונך למחוק את הפרופיל "${profile.name}"?`)) {
-                return;
-            }
-
-            try {
-                await apiCall(`/profiles/${profileId}`, 'DELETE');
-                showAlert('הפרופיל נמחק בהצלחה', 'success');
-                loadProfiles();
-            } catch (error) {
-                showAlert('שגיאה במחיקת הפרופיל', 'danger');
-            }
-        }
-
-        // ===== FACEBOOK MANAGEMENT =====
-
-        async function loadFacebookStatus() {
-            try {
-                const status = await apiCall('/facebook/status');
-                renderFacebookStatus(status);
-                
-                if (status.connected) {
-                    loadFacebookGroups();
-                }
-            } catch (error) {
-                showAlert('שגיאה בטעינת סטטוס פייסבוק', 'danger');
-            }
-        }
-
-        function renderFacebookStatus(status) {
-            const statusElement = document.getElementById('facebook-status');
-            const loginSection = document.getElementById('facebook-login-section');
-            const groupsSection = document.getElementById('facebook-groups-section');
-
-            if (status.connected) {
-                statusElement.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        <span>מחובר לפייסבוק</span>
-                        <span class="ms-auto text-muted">התחברות אחרונה: ${formatDate(status.last_login)}</span>
-                    </div>
-                `;
-                loginSection.style.display = 'none';
-                groupsSection.style.display = 'block';
-            } else {
-                statusElement.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-times-circle text-danger me-2"></i>
-                        <span>לא מחובר לפייסבוק</span>
-                    </div>
-                `;
-                loginSection.style.display = 'block';
-                groupsSection.style.display = 'none';
-            }
-        }
-
-        async function connectFacebook() {
-            try {
-                showLoading();
-                const result = await apiCall('/facebook/login', 'POST');
-                hideLoading();
-                
-                if (result.success !== false) {
-                    showAlert('התחברת לפייסבוק בהצלחה!', 'success');
-                    loadFacebookStatus();
-                } else {
-                    showAlert('שגיאה בהתחברות לפייסבוק', 'danger');
-                }
-            } catch (error) {
-                hideLoading();
-                showAlert('שגיאה בהתחברות לפייסבוק', 'danger');
-            }
-        }
-
-        async function loadFacebookGroups() {
-            try {
-                const response = await apiCall('/facebook/groups');
-                facebookGroups = response.groups;
-                renderFacebookGroups();
-            } catch (error) {
-                showAlert('שגיאה בטעינת קבוצות פייסבוק', 'danger');
-            }
-        }
-
-        function renderFacebookGroups() {
-            const container = document.getElementById('facebook-groups-list');
-            if (!container) return;
-
-            if (facebookGroups.length === 0) {
-                container.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        לא נמצאו קבוצות. לחץ על "הוסף קבוצה" כדי להתחיל.
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = facebookGroups.map(group => `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="card-title">${group.name}</h6>
-                                <p class="card-text text-muted">
-                                    <i class="fas fa-users me-1"></i>
-                                    ${group.members.toLocaleString()} חברים
-                                </p>
-                                <small class="text-muted">
-                                    סריקה אחרונה: ${formatDate(group.last_scan)}
-                                </small>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-${group.active ? 'success' : 'secondary'} me-2">
-                                    ${group.active ? 'פעיל' : 'לא פעיל'}
-                                </span>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="toggleFacebookGroup('${group.id}')">
-                                        <i class="fas fa-${group.active ? 'pause' : 'play'}"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="removeFacebookGroup('${group.id}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <a href="${group.url}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-external-link-alt me-1"></i>
-                                צפה בקבוצה
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addFacebookGroup() {
-            document.getElementById('facebookGroupForm').reset();
-            new bootstrap.Modal(document.getElementById('facebookGroupModal')).show();
-        }
-
-        async function saveFacebookGroup() {
-            const form = document.getElementById('facebookGroupForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const groupData = {
-                url: document.getElementById('groupUrl').value,
-                name: document.getElementById('groupName').value || 'קבוצה ללא שם',
-                active: document.getElementById('groupActive').checked
-            };
-
-            try {
-                await apiCall('/facebook/groups', 'POST', groupData);
-                showAlert('הקבוצה נוספה בהצלחה', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('facebookGroupModal')).hide();
-                loadFacebookGroups();
-            } catch (error) {
-                showAlert('שגיאה בהוספת הקבוצה', 'danger');
-            }
-        }
-
-        async function toggleFacebookGroup(groupId) {
-            try {
-                await apiCall(`/facebook/groups/${groupId}/toggle`, 'POST');
-                showAlert('סטטוס הקבוצה עודכן', 'success');
-                loadFacebookGroups();
-            } catch (error) {
-                showAlert('שגיאה בעדכון הקבוצה', 'danger');
-            }
-        }
-
-        async function removeFacebookGroup(groupId) {
-            if (!confirm('האם אתה בטוח שברצונך להסיר את הקבוצה?')) {
-                return;
-            }
-
-            try {
-                await apiCall(`/facebook/groups/${groupId}`, 'DELETE');
-                showAlert('הקבוצה הוסרה בהצלחה', 'success');
-                loadFacebookGroups();
-            } catch (error) {
-                showAlert('שגיאה בהסרת הקבוצה', 'danger');
-            }
-        }
-
-        // ===== YAD2 MANAGEMENT =====
-
-        async function loadYad2Settings() {
-            try {
-                const response = await apiCall('/yad2/config');
-                yad2Urls = response.config.search_urls;
-                renderYad2Urls();
-            } catch (error) {
-                showAlert('שגיאה בטעינת הגדרות יד2', 'danger');
-            }
-        }
-
-        function renderYad2Urls() {
-            const container = document.getElementById('yad2-urls-list');
-            if (!container) return;
-
-            if (yad2Urls.length === 0) {
-                container.innerHTML = `
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        לא נמצאו כתובות חיפוש. לחץ על "הוסף כתובת חיפוש" כדי להתחיל.
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = yad2Urls.map(urlConfig => `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h6 class="card-title">${urlConfig.name}</h6>
-                                <p class="card-text">
-                                    <small class="text-muted">${urlConfig.url}</small>
-                                </p>
-                                <small class="text-muted">
-                                    סריקה אחרונה: ${formatDate(urlConfig.last_scan)}
-                                </small>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <span class="badge bg-${urlConfig.active ? 'success' : 'secondary'} me-2">
-                                    ${urlConfig.active ? 'פעיל' : 'לא פעיל'}
-                                </span>
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="toggleYad2Url('${urlConfig.id}')">
-                                        <i class="fas fa-${urlConfig.active ? 'pause' : 'play'}"></i>
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="removeYad2Url('${urlConfig.id}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <a href="${urlConfig.url}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-external-link-alt me-1"></i>
-                                פתח ביד2
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addYad2Url() {
-            document.getElementById('yad2UrlForm').reset();
-            new bootstrap.Modal(document.getElementById('yad2UrlModal')).show();
-        }
-
-        async function saveYad2Url() {
-            const form = document.getElementById('yad2UrlForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const urlData = {
-                url: document.getElementById('searchUrl').value,
-                name: document.getElementById('searchName').value || 'חיפוש ללא שם',
-                active: document.getElementById('searchActive').checked
-            };
-
-            try {
-                await apiCall('/yad2/urls', 'POST', urlData);
-                showAlert('כתובת החיפוש נוספה בהצלחה', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('yad2UrlModal')).hide();
-                loadYad2Settings();
-            } catch (error) {
-                showAlert('שגיאה בהוספת כתובת החיפוש', 'danger');
-            }
-        }
-
-        async function toggleYad2Url(urlId) {
-            try {
-                await apiCall(`/yad2/urls/${urlId}/toggle`, 'POST');
-                showAlert('סטטוס החיפוש עודכן', 'success');
-                loadYad2Settings();
-            } catch (error) {
-                showAlert('שגיאה בעדכון החיפוש', 'danger');
-            }
-        }
-
-        async function removeYad2Url(urlId) {
-            if (!confirm('האם אתה בטוח שברצונך להסיר את החיפוש?')) {
-                return;
-            }
-
-            try {
-                await apiCall(`/yad2/urls/${urlId}`, 'DELETE');
-                showAlert('החיפוש הוסר בהצלחה', 'success');
-                loadYad2Settings();
-            } catch (error) {
-                showAlert('שגיאה בהסרת החיפוש', 'danger');
-            }
-        }
-
-        async function saveYad2Settings() {
-            const settings = {
-                scan_frequency: parseInt(document.getElementById('scan-frequency').value),
-                auto_scan: document.getElementById('auto-scan').checked
-            };
-
-            try {
-                await apiCall('/yad2/config', 'PUT', settings);
-                showAlert('הגדרות יד2 נשמרו בהצלחה', 'success');
-            } catch (error) {
-                showAlert('שגיאה בשמירת הגדרות יד2', 'danger');
-            }
-        }
-
-        // ===== NOTIFICATIONS MANAGEMENT =====
-
-        async function loadNotifications(filter = 'all') {
-            try {
-                let endpoint = '/notifications';
-                if (filter === 'today') {
-                    endpoint += '?filter=today';
-                } else if (filter === 'week') {
-                    endpoint += '?filter=week';
-                }
-
-                const response = await apiCall(endpoint);
-                notifications = response.notifications;
-                renderNotifications();
-                updateNotificationStats();
-            } catch (error) {
-                showAlert('שגיאה בטעינת ההתראות', 'danger');
-            }
-        }
-
-        function renderNotifications() {
-            const container = document.getElementById('notifications-list');
-            if (!container) return;
-
-            if (notifications.length === 0) {
-                container.innerHTML = `
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-bell-slash me-2"></i>
-                        לא נמצאו התראות במסנן הנבחר.
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = notifications.map(notification => `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <div class="row">
-                            ${notification.image_url ? `
-                                <div class="col-md-3">
-                                    <img src="${notification.image_url}" class="img-fluid rounded" 
-                                         alt="תמונת הנכס" style="max-height: 150px; object-fit: cover;">
-                                </div>
-                            ` : ''}
-                            <div class="col-md-${notification.image_url ? '9' : '12'}">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="card-title mb-0">${notification.title}</h6>
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge bg-primary me-2">${notification.source}</span>
-                                        <span class="badge bg-${notification.sent ? 'success' : 'warning'}">
-                                            ${notification.sent ? 'נשלח' : 'ממתין'}
-                                        </span>
-                                    </div>
-                                </div>
-                                <p class="card-text">${notification.message}</p>
-                                <div class="row text-muted small">
-                                    <div class="col-md-6">
-                                        <i class="fas fa-clock me-1"></i>
-                                        ${formatDate(notification.timestamp)}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <i class="fas fa-search me-1"></i>
-                                        ${notification.profile_name}
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <a href="${notification.property_url}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                        <i class="fas fa-external-link-alt me-1"></i>
-                                        צפה בנכס
-                                    </a>
-                                    <span class="ms-2 text-muted">
-                                        <i class="fab fa-${notification.channel}"></i>
-                                        נשלח ב${notification.channel === 'telegram' ? 'טלגרם' : notification.channel}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateNotificationStats() {
-            // This would be calculated from real data
-            document.getElementById('total-notifications').textContent = '156';
-            document.getElementById('today-notifications').textContent = notifications.filter(n => 
-                new Date(n.timestamp).toDateString() === new Date().toDateString()
-            ).length;
-            document.getElementById('success-rate').textContent = '98%';
-            document.getElementById('pending-notifications').textContent = notifications.filter(n => !n.sent).length;
-        }
-
-        // ===== SETTINGS MANAGEMENT =====
-
-        async function loadGeneralSettings() {
-            try {
-                const settings = await apiCall('/settings');
-                populateSettingsForm(settings);
-            } catch (error) {
-                showAlert('שגיאה בטעינת ההגדרות', 'danger');
-            }
-        }
-
-        function populateSettingsForm(settings) {
-            // This would populate the settings form with current values
-            console.log('Loading settings:', settings);
-        }
-
-        async function saveGeneralSettings() {
-            const settings = {
-                notification_preferences: {
-                    telegram: document.getElementById('telegram-notifications').checked,
-                    email: document.getElementById('email-notifications').checked,
-                    browser: document.getElementById('browser-notifications').checked,
-                    quiet_hours: {
-                        start: document.getElementById('quiet-start').value,
-                        end: document.getElementById('quiet-end').value
-                    },
-                    max_notifications: parseInt(document.getElementById('max-notifications').value),
-                    include_images: document.getElementById('include-images').checked
-                },
-                system_preferences: {
-                    language: document.getElementById('language').value,
-                    timezone: document.getElementById('timezone').value,
-                    dark_mode: document.getElementById('dark-mode').checked,
-                    auto_refresh: document.getElementById('auto-refresh').checked
-                }
-            };
-
-            try {
-                await apiCall('/settings', 'PUT', settings);
-                showAlert('ההגדרות נשמרו בהצלחה', 'success');
-            } catch (error) {
-                showAlert('שגיאה בשמירת ההגדרות', 'danger');
-            }
-        }
-
-        // Data management functions
-        async function exportData(type) {
-            try {
-                let endpoint = '';
-                if (type === 'profiles') {
-                    endpoint = '/profiles/export';
-                } else if (type === 'notifications') {
-                    endpoint = '/notifications/export';
-                }
-
-                const data = await apiCall(endpoint);
-                
-                // Create and download file
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${type}_export_${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                showAlert(`ייצוא ${type === 'profiles' ? 'פרופילים' : 'התראות'} הושלם`, 'success');
-            } catch (error) {
-                showAlert('שגיאה בייצוא הנתונים', 'danger');
-            }
-        }
-
-        async function importData() {
-            const fileInput = document.getElementById('import-file');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                showAlert('אנא בחר קובץ לייבוא', 'warning');
-                return;
-            }
-
-            try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-                
-                await apiCall('/import', 'POST', data);
-                showAlert('הייבוא הושלם בהצלחה', 'success');
-                
-                // Refresh current section
-                if (currentSection === 'profiles') {
-                    loadProfiles();
-                }
-            } catch (error) {
-                showAlert('שגיאה בייבוא הנתונים', 'danger');
-            }
-        }
-
-        async function clearAllData() {
-            if (!confirm('האם אתה בטוח שברצונך למחוק את כל הנתונים? פעולה זו אינה הפיכה!')) {
-                return;
-            }
-
-            if (!confirm('זוהי אזהרה אחרונה! כל הפרופילים וההתראות יימחקו. האם להמשיך?')) {
-                return;
-            }
-
-            try {
-                await apiCall('/data/clear', 'DELETE');
-                showAlert('כל הנתונים נמחקו', 'success');
-                
-                // Refresh current section
-                if (currentSection === 'profiles') {
-                    loadProfiles();
-                } else if (currentSection === 'notifications') {
-                    loadNotifications();
-                }
-            } catch (error) {
-                showAlert('שגיאה במחיקת הנתונים', 'danger');
-            }
-        }
-
-        // ===== TELEGRAM FUNCTIONS =====
-
-        async function saveTelegramSettings() {
-            const chatId = document.getElementById('telegram-chat-id').value.trim();
-            
-            if (!chatId) {
-                showAlert('אנא הכנס Chat ID', 'warning');
-                return;
-            }
-            
-            try {
-                await apiCall('/telegram/setup', 'POST', { chat_id: chatId });
-                showAlert('הגדרות הטלגרם נשמרו בהצלחה!', 'success');
-            } catch (error) {
-                showAlert('שגיאה בשמירת הגדרות הטלגרם', 'danger');
-            }
-        }
-
-        async function testTelegramConnection() {
-            const chatId = document.getElementById('telegram-chat-id').value.trim();
-            
-            if (!chatId) {
-                showAlert('אנא הכנס Chat ID קודם', 'warning');
-                return;
-            }
-            
-            try {
-                const result = await apiCall('/telegram/test', 'POST');
-                if (result.success !== false) {
-                    showAlert('הודעת בדיקה נשלחה בהצלחה! בדוק את הטלגרם שלך.', 'success');
-                } else {
-                    showAlert('שגיאה בשליחת הודעת בדיקה: ' + (result.message || ''), 'danger');
-                }
-            } catch (error) {
-                showAlert('שגיאה בבדיקת החיבור לטלגרם', 'danger');
-            }
-        }
-
-        function findChatId() {
-            showAlert('פונקציונליות חיפוש Chat ID אוטומטי תוטמע בקרוב. כרגע, אנא שלח הודעה לבוט ואז הכנס את ה-Chat ID ידנית.', 'info');
-        }
-
-        // ===== UTILITY FUNCTIONS =====
-
-        function showLoading() {
-            console.log('Loading started...');
-        }
-
-        function hideLoading() {
-            console.log('Loading finished...');
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'לא זמין';
-            
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-
-            if (diffMins < 1) return 'עכשיו';
-            if (diffMins < 60) return `לפני ${diffMins} דקות`;
-            if (diffHours < 24) return `לפני ${diffHours} שעות`;
-            if (diffDays < 7) return `לפני ${diffDays} ימים`;
-            
-            return date.toLocaleDateString('he-IL');
-        }
-
-        function showAlert(message, type = 'info') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            alertDiv.style.cssText = 'top: 20px; left: 20px; z-index: 10000; max-width: 400px;';
-            alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(alertDiv);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.remove();
-                }
-            }, 5000);
-        }
-    </script>
+    <!-- Application Scripts -->
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/components.js"></script>
+    <script src="/static/js/components-extended.js"></script>
+    <script src="/static/js/app.js"></script>
 </body>
 </html>

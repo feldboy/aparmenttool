@@ -101,7 +101,7 @@ class AIAgentManager:
             
             # DeepSeek
             deepseek_key = os.getenv("DEEPSEEK_API_KEY")
-            logger.debug(f"DeepSeek key check: {repr(deepseek_key)}")
+            logger.debug("DeepSeek key check: %r", deepseek_key)
             if deepseek_key and deepseek_key not in ["your_deepseek_api_key_here", "your-deepseek-key-here"]:
                 try:
                     config = AgentConfig(
@@ -120,15 +120,17 @@ class AIAgentManager:
                     )
                     self.enabled_providers.append(AIProvider.DEEPSEEK)
                     logger.info("DeepSeek provider initialized")
-                except Exception as e:
-                    logger.error(f"Failed to initialize DeepSeek provider: {e}")
+                except (ValueError, TypeError, ConnectionError) as e:
+                    logger.error("Failed to initialize DeepSeek provider: %s", str(e))
             else:
-                logger.debug(f"DeepSeek not initialized - key validation failed")
+                logger.debug("DeepSeek not initialized - key validation failed")
             
-            logger.info(f"AI Agent Manager initialized with {len(self.enabled_providers)} providers: {[p.value for p in self.enabled_providers]}")
+            logger.info("AI Agent Manager initialized with %d providers: %s", 
+                       len(self.enabled_providers), 
+                       [p.value for p in self.enabled_providers])
             
-        except Exception as e:
-            logger.error(f"Error initializing AI providers: {e}")
+        except (ValueError, TypeError, ConnectionError) as e:
+            logger.error("Error initializing AI providers: %s", str(e))
     
     async def analyze_property_single(self, request: AnalysisRequest, provider: AIProvider) -> PropertyAnalysis:
         """Analyze property with a single AI provider"""
